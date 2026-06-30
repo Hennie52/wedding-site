@@ -1,0 +1,58 @@
+[
+  {
+    "stem": "ring",
+    "alt": "Hennie en Jolinda, die ring",
+    "thumb": "ring-thumb.webp",
+    "full": "ring.webp",
+    "jpg": "ring.jpg"
+  },
+  {
+    "stem": "wandel",
+    "alt": "Die gesin stap saam",
+    "thumb": "wandel-thumb.webp",
+    "full": "wandel.webp",
+    "jpg": "wandel.jpg"
+  },
+  {
+    "stem": "seun",
+    "alt": "Ons seun in die veld",
+    "thumb": "seun-thumb.webp",
+    "full": "seun.webp",
+    "jpg": "seun.jpg"
+  },
+  {
+    "stem": "opgooi",
+    "alt": "Pa gooi seun in die lug",
+    "thumb": "opgooi-thumb.webp",
+    "full": "opgooi.webp",
+    "jpg": "opgooi.jpg"
+  },
+  {
+    "stem": "familie",
+    "alt": "Gesinsportret",
+    "thumb": "familie-thumb.webp",
+    "full": "familie.webp",
+    "jpg": "familie.jpg"
+  },
+  {
+    "stem": "ma-seun",
+    "alt": "Ma en seun",
+    "thumb": "ma-seun-thumb.webp",
+    "full": "ma-seun.webp",
+    "jpg": "ma-seun.jpg"
+  },
+  {
+    "stem": "familie-sw",
+    "alt": "Gesin in swart en wit",
+    "thumb": "familie-sw-thumb.webp",
+    "full": "familie-sw.webp",
+    "jpg": "familie-sw.jpg"
+  },
+  {
+    "stem": "ma-seun2",
+    "alt": "Ma en seun, hand aan hand",
+    "thumb": "ma-seun2-thumb.webp",
+    "full": "ma-seun2.webp",
+    "jpg": "ma-seun2.jpg"
+  }
+]

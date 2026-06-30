@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="af">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hennie &amp; Jolinda — Trouportaal</title>
+  <meta name="description" content="Hennie &amp; Jolinda se trouportaal — 7 November 2026.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#4F5D3A">
+  <!-- Deel-voorskou (WhatsApp / Facebook). Ná uitrol: stel die volle URL hier, bv. https://joudomein.co.za/assets/foto/wandel.jpg -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hennie &amp; Jolinda — Trouportaal">
+  <meta property="og:description" content="Ons gaan trou! 7 November 2026 · Kom kyk en RSVP.">
+  <meta property="og:image" content="assets/foto/wandel.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/portal.css">
+</head>
+<body>
+
+<!-- ════════ TOEGANGSHEK ════════ -->
+<div id="gate" class="gate hidden">
+  <div class="gate__bg" data-img="img_hero"></div>
+  <div class="gate__veil"></div>
+  <div class="gate__card">
+    <div class="gate__names"><span data-content="bruidegom">Hennie</span> <span class="amp">&amp;</span> <span data-content="bruid">Jolinda</span></div>
+    <p class="gate__sub" data-content="gate_sub">Trouportaal · 7.11.2026</p>
+    <h1 class="gate__h" data-content="gate_welkom">Welkom</h1>
+    <p class="gate__p" data-content="gate_p">Tik die kode op jou uitnodiging in om binne te tree.</p>
+    <input id="gate-code" class="fld" placeholder="Toegangskode" autocomplete="off" inputmode="text">
+    <p id="gate-err" class="gate__err hidden"></p>
+    <button id="gate-btn" class="gate__btn"><span data-content="gate_btn">Tree binne ✦</span></button>
+    <div class="gate__foot">
+      <a class="link" href="admin.html">Admin aanmelding</a>
+    </div>
+    <p class="gate__hint" data-content="gate_hint">Die kode staan op jou uitnodiging.</p>
+  </div>
+</div>
+
+<!-- ════════ GAS-WERF ════════ -->
+<div id="site" class="hidden">
+  <div class="grain"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav__in">
+      <button class="nav__brand" data-scroll="tuis"><span data-content="nav_brand">H &amp; J</span></button>
+      <div class="nav__links">
+        <button class="nav__link" data-scroll="storie" data-content="nav_storie">Ons Storie</button>
+        <button class="nav__link" data-scroll="program" data-content="nav_program">Program</button>
+        <button class="nav__link" data-scroll="galery" data-content="nav_galery">Galery</button>
+        <button class="nav__link" data-scroll="verblyf" data-content="nav_verblyf">Verblyf</button>
+        <button class="nav__link" data-scroll="tema" data-content="nav_tema">Tema</button>
+        <button class="nav__link" data-scroll="geskenke" data-content="nav_geskenke">Geskenke</button>
+        <button class="nav__link" data-scroll="vrae" data-content="nav_vrae">Q&amp;A</button>
+        <button class="nav__rsvp" data-scroll="rsvp"><span data-content="nav_rsvp">RSVP</span></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header id="tuis" class="hero">
+    <div>
+      <div class="hero__pre"><span></span><p data-content="hero_eyebrow">Die troue van</p></div>
+      <h1 class="hero__names"><span data-content="bruidegom">Hennie</span><br><em>&amp; <span data-content="bruid">Jolinda</span></em></h1>
+      <div class="hero__meta"><span></span><p data-content="hero_meta">Sat · 07 Nov 2026 · 16:00</p></div>
+      <p class="hero__intro" data-content="hero_intro"></p>
+      <div class="hero__cta">
+        <button class="btn-fill" data-scroll="rsvp">Bevestig bywoning</button>
+        <button class="btn-ghost" data-scroll="storie">Ons storie</button>
+      </div>
+    </div>
+    <div class="hero__media">
+      <div class="hero__frame"></div>
+      <div class="hero__img">
+        <div class="bg" data-img="img_hero"></div><div class="veil"></div>
+        <div class="twinkle" style="left:22px;top:60px;width:16px;height:16px"></div>
+        <div class="twinkle" style="left:48px;top:50px;width:9px;height:9px;animation-delay:1.2s"></div>
+      </div>
+      <div class="hero__badge"><i></i><b data-content="monogram">H&amp;J</b><small data-content="monogram_date">07.11.26</small></div>
+    </div>
+    <div class="hero__cue"><span class="track"><i></i></span><span>Blaai af</span></div>
+  </header>
+
+  <!-- COUNTDOWN -->
+  <section class="cd-band">
+    <div class="inner" data-reveal>
+      <div class="eyebrow"><span class="l"></span><span class="d"></span><span class="l"></span></div>
+      <p class="cd-pre" data-content="cd_pre">Ons sê “ja” oor</p>
+      <div class="cd">
+        <div class="cd__cell"><i></i><span class="cd__num" id="cd-dae">—</span><span class="cd__line"></span><span class="cd__lab">Dae</span></div>
+        <div class="cd__cell"><i></i><span class="cd__num" id="cd-ure">—</span><span class="cd__line"></span><span class="cd__lab">Ure</span></div>
+        <div class="cd__cell"><i></i><span class="cd__num" id="cd-min">—</span><span class="cd__line"></span><span class="cd__lab">Minute</span></div>
+        <div class="cd__cell cd__cell--dark"><i></i><span class="cd__num" id="cd-sek">—</span><span class="cd__line"></span><span class="cd__lab">Sekondes</span></div>
+      </div>
+      <p class="cd-cap" data-content="countdown_caption"></p>
+    </div>
+  </section>
+
+  <!-- ONS STORIE -->
+  <section id="storie" class="section section-narrow">
+    <div class="head" data-reveal>
+      <div class="eyebrow"><span class="l"></span><span class="d"></span><span class="l"></span></div>
+      <p class="kicker" data-content="kicker_storie">Ons storie</p>
+      <h2 class="h2" data-content="storie_opskrif">Hoe dit alles <em>begin het</em></h2>
+    </div>
+    <div id="storie-blocks"></div>
+  </section>
+
+  <!-- PROGRAM -->
+  <section id="program" class="section section--alt">
+    <div class="section-mid">
+      <div class="head" data-reveal>
+        <div class="eyebrow"><span class="l"></span><span class="d"></span><span class="l"></span></div>
+        <p class="kicker" data-content="kicker_program">Program vir die naweek</p>
+        <h2 class="h2" data-content="program_opskrif">Die dag se <em>gebeure</em></h2>
+      </div>
+      <div data-reveal>
+        <div class="day"><b data-content="prog_d1_num">06</b><div><div class="d1" data-content="prog_d1_naam">Vrydag</div><div class="d2" data-content="prog_d1_sub">November 2026</div></div></div>
+        <div id="prog-vry"></div>
+        <div class="day" style="border-left-color:var(--olive)"><b data-content="prog_d2_num">07</b><div><div class="d1" data-content="prog_d2_naam">Saterdag</div><div class="d2" data-content="prog_d2_sub">November 2026 · Troudag</div></div></div>
+        <div id="prog-sat"></div>
+        <div class="day" style="border-left-color:var(--sage)"><b data-content="prog_d3_num">08</b><div><div class="d1" data-content="prog_d3_naam">Sondag</div><div class="d2" data-content="prog_d3_sub">November 2026</div></div></div>
+        <div id="prog-son"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERY -->
+  <section id="galery" class="section section-narrow">
+    <div class="head" data-reveal>
+      <div class="eyebrow"><span class="l"></span><span class="d"></span><span class="l"></span></div>
+      <p class="kicker" data-content="kicker_galery">Ons oomblikke</p>
+      <h2 class="h2" data-content="galery_opskrif">Vasgelê in <em>liefde</em></h2>
+    </div>
+    <div class="gal" id="gal" data-reveal></div>
+  </section>
+
+  <!-- VERBLYF -->
+  <section id="verblyf" class="section section--alt">
+    <div class="section-narrow">
+      <div class="head" data-reveal>
+        <div class="eyebrow"><span class="l"></span><span class="d"></span><span class="l"></span></div>
+        <p class="kicker" data-content="kicker_verblyf">Verblyf</p>
+        <h2 class="h2" data-content="verblyf_opskrif">Waar om <em>te bly</em></h2>
+      </div>
+      <div class="cards" id="verblyf-cards" data-reveal></div>
+      <p class="vnote" data-content="verblyf_note" data-reveal></p>
+    </div>
+  </section>
+
+  <!-- TEMA -->
+  <section id="tema" class="section section-narrow">
+    <div class="two">
+      <div data-reveal>
+        <div class="chap" style="margin-bottom:14px"><span class="l" style="background:var(--gold)"></span><span class="t" style="color:var(--sage2);letter-spacing:4px" data-content="kicker_tema">Tema &amp; drag</span></div>
+        <h2 class="h2" style="margin-bottom:22px" data-content="tema_opskrif">Eukalyptus, <em>groen &amp; sand</em></h2>
+        <p class="prose" data-content="tema_p1"></p>
+        <p class="prose"><strong style="font-weight:500;color:var(--ink)" data-content="tema_drag_label">Drag:</strong> <span data-content="tema_drag"></span></p>
+        <div class="swatches" id="tema-swatches"></div>
+      </div>
+      <div class="two__img" style="box-shadow:0 26px 60px -26px rgba(52,64,42,.5)" data-reveal>
+        <img src="assets/foto/familie.jpg" alt="Drag-inspirasie" data-img="img_tema"><i></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- GESKENKE -->
+  <section id="geskenke" class="section section--ink">
+    <div class="section-mid center" data-reveal>
+      <div class="eyebrow"><span class="l"></span><span class="d"></span><span class="l"></span></div>
+      <p class="kicker" data-content="kicker_geskenke">Geskenke</p>
+      <h2 class="h2" data-content="geskenke_opskrif">'n Bydrae tot ons <em>nuwe begin</em></h2>
+      <p class="gift-p" data-content="geskenke_intro" style="margin-top:22px"></p>
+      <div class="bankbox"><i></i><div id="bank"></div></div>
+    </div>
+  </section>
+
+  <!-- VRAE -->
+  <section id="vrae" class="section section-mid">
+    <div class="head" data-reveal>
+      <div class="eyebrow"><span class="l"></span><span class="d"></span><span class="l"></span></div>
+      <p class="kicker" data-content="kicker_vrae">Vrae &amp; antwoorde</p>
+      <h2 class="h2" data-content="vrae_opskrif">Goed om te <em>weet</em></h2>
+    </div>
+    <div id="vrae-list" data-reveal></div>
+  </section>
+
+  <!-- RSVP -->
+  <section id="rsvp" class="section section--alt">
+    <div class="section-mid">
+      <div class="head" data-reveal>
+        <div class="eyebrow"><span class="l"></span><span class="d"></span><span class="l"></span></div>
+        <p class="kicker" data-content="kicker_rsvp">Bevestig jou bywoning</p>
+        <h2 class="h2" style="font-size:clamp(38px,6vw,62px)">RSVP</h2>
+        <p class="rsvp-sub" data-content="rsvp_intro"></p>
+      </div>
+      <div class="rsvp-card" data-reveal>
+        <!-- DANKIE -->
+        <div id="rsvp-thanks" class="rsvp-thanks hidden">
+          <div class="seal"><i></i><b data-content="monogram">H&amp;J</b></div>
+          <h3 id="rsvp-thanks-h">Baie dankie!</h3>
+          <p id="rsvp-thanks-p"></p>
+          <button id="rsvp-edit" class="link" style="margin-top:30px;border-bottom:1px solid rgba(110,124,80,.4);padding:6px 2px">Wysig my antwoord</button>
+        </div>
+
+        <!-- VORM -->
+        <form id="rsvp-form" novalidate>
+          <span class="rq center" style="margin-bottom:20px" data-content="rsvp_q_kom">Kom jy die troue toe?</span>
+          <div class="choices" style="margin-bottom:8px">
+            <button type="button" class="choice big" data-kom="ja"><span data-content="rsvp_btn_ja">Ja, ek/ons kom!</span></button>
+            <button type="button" class="choice big" data-kom="nee"><span data-content="rsvp_btn_nee">Ongelukkig nie</span></button>
+          </div>
+
+          <!-- KOM NEE -->
+          <div id="rsvp-nee" class="hidden" style="margin-top:28px;text-align:center">
+            <p class="prose" style="text-align:center" data-content="rsvp_nee_teks">Ons gaan jou mis, maar verstaan heeltemal. Dankie dat jy laat weet.</p>
+            <p class="rq" style="margin:26px 0 12px;text-align:left">Boodskap aan ons (opsioneel)</p>
+            <textarea class="rin" id="boodskap-nee" placeholder="Stuur vir ons 'n nota…"></textarea>
+          </div>
+
+          <!-- KOM JA -->
+          <div id="rsvp-ja" class="hidden" style="margin-top:34px;display:flex;flex-direction:column;gap:30px">
+            <div>
+              <div class="rrow"><span class="rnum">01</span><span class="rq" style="margin:0"><span data-content="rsvp_q_wie">Wie kom alles?</span> <span id="seats-hint" style="color:var(--muted3)"></span></span></div>
+              <div id="gaste-velde" style="display:flex;flex-direction:column;gap:11px"></div>
+            </div>
+            <div class="rgrp">
+              <div class="rrow"><span class="rnum">02</span><span class="rq" style="margin:0" data-content="rsvp_q_slaap">Slaap jy/julle oor?</span></div>
+              <div class="choices" data-group="slaap">
+                <button type="button" class="choice" data-slaap="ja"><span data-content="rsvp_btn_slaap_ja">Ja</span></button>
+                <button type="button" class="choice" data-slaap="nee"><span data-content="rsvp_btn_slaap_nee">Nee</span></button>
+              </div>
+              <div id="rsvp-duur" class="hidden" style="margin-top:16px">
+                <span class="rq" data-content="rsvp_q_naweek">Vir hoe lank?</span>
+                <div class="choices" data-group="naweek">
+                  <button type="button" class="choice" data-naweek="naweek"><span data-content="rsvp_btn_naweek_heel">Die hele naweek</span></button>
+                  <button type="button" class="choice" data-naweek="saterdag"><span data-content="rsvp_btn_naweek_sat">Net Saterdagaand</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="rgrp">
+              <div class="rrow"><span class="rnum">03</span><span class="rq" style="margin:0" data-content="rsvp_q_ontbyt">Sondag-ontbytbuffet?</span></div>
+              <div class="choices" data-group="ontbyt">
+                <button type="button" class="choice" data-ontbyt="ja"><span data-content="rsvp_btn_ontbyt_ja">Ja, graag</span></button>
+                <button type="button" class="choice" data-ontbyt="nee"><span data-content="rsvp_btn_ontbyt_nee">Nee dankie</span></button>
+              </div>
+            </div>
+            <div class="rgrp">
+              <div class="rrow"><span class="rnum">04</span><span class="rq" style="margin:0" data-content="rsvp_q_dieet">Dieetbehoeftes of allergieë</span></div>
+              <textarea class="rin" id="dieet" placeholder="Bv. glutenvry, vegetaries, neut-allergie…"></textarea>
+            </div>
+            <div class="rgrp">
+              <div class="rrow" style="margin-bottom:6px"><span class="rnum">05</span><span class="rq" style="margin:0" data-content="rsvp_q_liedjies">Versoek 3 liedjies vir die dansvloer</span></div>
+              <p class="prose" style="font-style:italic;font-size:16px;color:var(--muted3);margin:0 0 16px 32px">Tik die naam, of plak gerus 'n Spotify/YouTube-skakel.</p>
+              <div class="rsvp-songs">
+                <div class="rsvp-song"><b>1</b><input class="rin" id="lied0" placeholder="Naam of skakel"></div>
+                <div class="rsvp-song"><b>2</b><input class="rin" id="lied1" placeholder="Naam of skakel"></div>
+                <div class="rsvp-song"><b>3</b><input class="rin" id="lied2" placeholder="Naam of skakel"></div>
+              </div>
+            </div>
+            <!-- Eie vrae (deur die admin bygevoeg) -->
+            <div id="rsvp-extra-q"></div>
+            <div class="rgrp">
+              <div class="rrow"><span class="rnum">06</span><span class="rq" style="margin:0" data-content="rsvp_q_boodskap">'n Boodskap aan Hennie &amp; Jolinda</span></div>
+              <textarea class="rin" id="boodskap-ja" placeholder="Deel 'n wens, 'n grappie of net liefde…"></textarea>
+            </div>
+          </div>
+
+          <div id="rsvp-actions" class="hidden" style="margin-top:6px;display:flex;flex-direction:column;gap:12px">
+            <button type="submit" class="rsend" id="rsvp-submit">Stuur antwoord</button>
+            <p id="rsvp-err" class="rerr hidden"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="foot__seal"><i></i><b data-content="monogram">H&amp;J</b></div>
+    <div class="foot__names"><span data-content="bruidegom">Hennie</span> <span class="amp">&amp;</span> <span data-content="bruid">Jolinda</span></div>
+    <p class="foot__date" data-content="datum_teks">7 November 2026</p>
+    <div class="foot__tel">
+      <div><div class="lab">Hennie</div><div class="num" data-content="tel_hennie"></div></div>
+      <div><div class="lab">Jolinda</div><div class="num" data-content="tel_jolinda"></div></div>
+    </div>
+    <div class="foot__links">
+      <button class="link" id="gate-logout">Teken uit</button>
+      <a class="link" href="admin.html">Admin</a>
+    </div>
+  </footer>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" class="lb hidden">
+  <button class="lb__x" data-lb-close>Sluit ✕</button>
+  <button class="lb__nav lb__nav--prev" data-lb-prev>‹</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb__nav lb__nav--next" data-lb-next>›</button>
+  <span class="lb__count" id="lb-count"></span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/content-schema.js"></script>
+<script src="assets/js/shared.js"></script>
+<script src="assets/js/supabase-client.js"></script>
+<script src="assets/js/portal.js"></script>
+</body>
+</html>

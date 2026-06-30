@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"D:/Users/henni/Desktop/Desktop/Troue/Website\" 2>/dev/null; echo \"---PARENT---\"; ls -la \"D:/Users/henni/Desktop/Desktop/Troue\" 2>/dev/null)"
+    ]
+  }
+}

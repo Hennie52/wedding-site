@@ -1,0 +1,15 @@
+{
+  "name": "hennie-jolinda-wedding",
+  "version": "1.0.0",
+  "description": "Hennie & Jolinda se troue-webwerf",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "optimize-images": "node scripts/optimize-images.mjs",
+    "dev": "node scripts/serve.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}

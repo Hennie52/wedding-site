@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="af">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hennie & Jolinda — Troue Beplanner</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/supabase-client.js"></script>
+<style>
+:root {
+  --euc-deep:#3D5A47; --euc-mid:#5A7A62; --euc-sage:#7A9E7E; --euc-light:#A8C4AA;
+  --euc-mist:#D6E6D6; --euc-whisper:#EDF5ED;
+  --cream:#FAF7F2; --linen:#F3EDE3; --sand:#E4DACE; --taupe:#B5A898;
+  --gold:#B8963E; --gold-light:#D4C08A; --gold-glow:#F5EDDA;
+  --olive:#4A5E3C; --charcoal:#2C3028; --bark:#5C4A35; --white:#FFFFFF;
+  --blush:#D4A8A0; --error:#B85450; --error-bg:#FCEAEA;
+  --cancelled-bg:#F5F0EB; --cancelled-text:#B5A898;
+  --shadow-sm:0 1px 4px rgba(44,48,40,0.07); --shadow-md:0 4px 16px rgba(44,48,40,0.1);
+  --shadow-lg:0 8px 32px rgba(44,48,40,0.13);
+  --radius:10px; --radius-lg:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--charcoal);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 15% 20%,rgba(122,158,126,0.08) 0%,transparent 50%),radial-gradient(ellipse at 85% 80%,rgba(184,150,62,0.06) 0%,transparent 50%)}
+
+.header{position:relative;z-index:1;text-align:center;padding:18px 20px 12px;background:linear-gradient(180deg,var(--euc-whisper),var(--cream));border-bottom:1px solid var(--euc-mist);flex-shrink:0}
+.header-leaf{font-size:10px;letter-spacing:12px;color:var(--euc-sage);margin-bottom:4px}
+.header h1{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(20px,4vw,32px);color:var(--euc-deep)}
+.header h1 em{font-style:italic;color:var(--gold);font-weight:500}
+.header .venue{font-size:10px;color:var(--taupe);margin-top:2px;letter-spacing:3px;text-transform:uppercase}
+
+.tabs{display:flex;justify-content:center;gap:0;background:var(--white);border-bottom:1px solid var(--euc-mist);position:relative;z-index:50;flex-shrink:0}
+body.embed .tabs{display:none}
+.tab{padding:10px 16px;font-family:'Outfit',sans-serif;font-size:10px;font-weight:500;color:var(--taupe);cursor:pointer;border:none;background:transparent;letter-spacing:0.6px;text-transform:uppercase;transition:all 0.2s;position:relative;white-space:nowrap}
+.tab:hover{color:var(--euc-mid)}
+.tab.active{color:var(--euc-deep);font-weight:600}
+.tab.active::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2px;background:var(--gold);border-radius:2px}
+
+.toolbar{display:flex;justify-content:center;gap:5px;padding:8px 12px;flex-wrap:wrap;background:var(--cream);border-bottom:1px solid var(--euc-mist);flex-shrink:0;z-index:1;position:relative}
+.btn{font-family:'Outfit',sans-serif;padding:6px 14px;border:1px solid var(--euc-mist);border-radius:100px;background:var(--white);color:var(--euc-deep);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s}
+.btn:hover{background:var(--euc-whisper);border-color:var(--euc-light)}
+.btn-primary{background:var(--euc-deep);color:var(--euc-whisper);border-color:var(--euc-deep)}
+.btn-primary:hover{background:var(--olive)}
+.btn-gold{background:var(--gold);color:var(--white);border-color:var(--gold)}
+.btn-gold:hover{background:var(--bark);border-color:var(--bark)}
+.btn-danger{color:var(--error);border-color:#d4a0a0}
+.btn-danger:hover{background:var(--error-bg)}
+.btn-sm{padding:4px 10px;font-size:10px}
+
+.main-wrap{flex:1;overflow:hidden;position:relative;z-index:1}
+.page{display:none !important;height:100%}
+.page.active{display:flex !important}
+
+.page-split{flex-direction:row;height:100%}
+.sidebar{width:260px;min-width:260px;background:var(--white);border-right:1px solid var(--euc-mist);display:flex;flex-direction:column;height:100%}
+.sidebar-head{padding:10px 12px;border-bottom:1px solid var(--euc-mist);flex-shrink:0}
+.sidebar-head h2{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;color:var(--euc-deep)}
+.sidebar-head .count{font-size:10px;color:var(--taupe);margin-top:1px}
+.search-box{width:100%;padding:6px 10px;border:1px solid var(--euc-mist);border-radius:100px;font-family:'Outfit',sans-serif;font-size:11px;margin-top:5px;outline:none;background:var(--euc-whisper)}
+.search-box:focus{border-color:var(--euc-sage);background:var(--white)}
+.sidebar-actions{padding:6px 12px;border-bottom:1px solid var(--euc-mist);display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap}
+.guest-list{padding:6px 8px;overflow-y:auto;flex:1}
+.content-area{flex:1;overflow-y:auto;padding:14px}
+
+@media(max-width:768px){
+  .sidebar{width:100%;min-width:100%;max-height:35vh;border-right:none;border-bottom:1px solid var(--euc-mist)}
+  .page-split{flex-direction:column}
+  .groups-wrap{flex-direction:column!important}
+  .groups-panel{width:100%!important;max-height:35vh;border-right:none!important;border-bottom:1px solid var(--euc-mist)}
+  .rsvp-grid{grid-template-columns:1fr!important}
+}
+
+.chip{display:inline-flex;align-items:center;padding:4px 10px;margin:2px;border-radius:100px;font-size:11px;cursor:grab;transition:all 0.15s;border:1px solid var(--euc-mist);background:var(--euc-whisper);color:var(--euc-deep);user-select:none;position:relative}
+.chip:hover{background:var(--gold-glow);border-color:var(--gold-light);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.chip.dragging{opacity:0.35}
+.chip.selected{background:var(--gold);color:var(--white);border-color:var(--gold)}
+.chip .n{font-size:8px;color:var(--taupe);margin-right:4px}
+.chip.selected .n{color:var(--gold-light)}
+.chip.in-card{background:var(--euc-mist);border-color:var(--euc-light)}
+.chip.in-card:hover{background:var(--blush);border-color:#c09088}
+.chip.cancelled{opacity:0.35;text-decoration:line-through;cursor:default;background:var(--cancelled-bg);border-color:var(--sand)}
+.chip.cancelled:hover{transform:none;box-shadow:none;background:var(--cancelled-bg)}
+.chip-dot{width:7px;height:7px;border-radius:50%;margin-right:3px;flex-shrink:0;border:1px solid rgba(0,0,0,0.08)}
+.chip-x{margin-left:4px;font-size:9px;cursor:pointer;opacity:0.3;transition:opacity 0.15s}
+.chip-x:hover{opacity:1;color:var(--error)}
+
+.card{background:var(--white);border:1px solid var(--euc-mist);border-radius:var(--radius);margin-bottom:12px;box-shadow:var(--shadow-sm);transition:all 0.2s}
+.card.drag-over{box-shadow:0 0 0 2px var(--gold),var(--shadow-md)}
+.card.over-cap{border-color:var(--error);border-width:2px}
+.card-head{display:flex;align-items:center;gap:7px;padding:9px 12px;border-bottom:1px solid var(--euc-mist);background:linear-gradient(135deg,var(--euc-whisper),var(--cream));border-radius:var(--radius) var(--radius) 0 0;flex-wrap:wrap}
+.card-name{font-family:'Playfair Display',serif;font-size:13px;font-weight:500;color:var(--euc-deep);border:none;background:transparent;outline:none;min-width:70px;flex:1}
+.card-name:focus{border-bottom:1px solid var(--gold)}
+.card-meta{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.badge{font-size:8px;padding:2px 6px;border-radius:100px;font-weight:600;letter-spacing:0.3px;text-transform:uppercase}
+.badge-ri{background:#E8F0E8;color:#3D5A47;border:1px solid #A8C4AA}
+.badge-bc{background:#FFF6E0;color:#8B6914;border:1px solid #E0C880}
+.badge-st{background:#FDE8E0;color:#8B4A32;border:1px solid #D4A890}
+.badge-lf{background:#E8E8F0;color:#4A4A7A;border:1px solid #B0B0D4}
+.badge-cu{background:#F5EDDA;color:#8B7A3E;border:1px solid #D4C88A}
+.badge-tbl{background:var(--euc-mist);color:var(--euc-deep);border:1px solid var(--euc-light)}
+.cap-badge{font-size:10px;color:var(--taupe);background:var(--white);padding:2px 7px;border-radius:100px;border:1px solid var(--euc-mist);white-space:nowrap}
+.cap-badge.full{background:var(--euc-mist);color:var(--olive);border-color:var(--euc-light)}
+.cap-badge.over{background:var(--error-bg);color:var(--error);border-color:#d4a0a0}
+.card-notes{font-family:'Outfit',sans-serif;font-size:10px;color:var(--taupe);border:none;background:transparent;outline:none;width:100%;padding:3px 12px 0;font-style:italic}
+.card-body{padding:8px 10px;min-height:36px;display:flex;flex-wrap:wrap;align-content:flex-start}
+.card-body .empty{width:100%;text-align:center;padding:10px;color:var(--sand);font-size:11px;font-style:italic}
+.card-actions{display:flex;gap:3px}
+.ibtn{width:24px;height:24px;border-radius:50%;border:1px solid var(--euc-mist);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.15s;color:var(--euc-mid)}
+.ibtn:hover{background:var(--euc-whisper)}
+.ibtn.del:hover{background:var(--error-bg);color:var(--error)}
+
+.floor-container{flex:1;position:relative;overflow:auto;background:linear-gradient(rgba(61,90,71,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(61,90,71,0.03) 1px,transparent 1px);background-size:30px 30px;min-height:500px}
+.floor-table{position:absolute;cursor:grab;display:flex;flex-direction:column;align-items:center;user-select:none;z-index:10;transition:filter 0.2s}
+.floor-table:hover{z-index:20}
+.floor-table.ftd{cursor:grabbing;z-index:30;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.15))}
+.ft-circle{width:88px;height:88px;border-radius:50%;background:var(--white);border:2px solid var(--euc-light);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow-md);transition:all 0.2s}
+.floor-table:hover .ft-circle{border-color:var(--gold);box-shadow:var(--shadow-lg)}
+.ft-name{font-family:'Playfair Display',serif;font-size:10px;font-weight:500;color:var(--euc-deep);text-align:center;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ft-count{font-size:9px;color:var(--taupe);margin-top:1px}
+.ft-guests{position:absolute;top:94px;left:50%;transform:translateX(-50%);background:var(--white);border:1px solid var(--euc-mist);border-radius:6px;padding:4px 8px;font-size:9px;color:var(--euc-mid);white-space:nowrap;box-shadow:var(--shadow-sm);opacity:0;pointer-events:none;transition:opacity 0.2s;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.floor-table:hover .ft-guests{opacity:1}
+
+.rsvp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;padding:14px}
+.rsvp-card{background:var(--white);border:1px solid var(--euc-mist);border-radius:var(--radius);padding:10px 12px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-sm)}
+.rsvp-card.cancelled{opacity:0.45;background:var(--cancelled-bg)}
+.rsvp-num{font-size:9px;color:var(--taupe);min-width:18px}
+.rsvp-name{flex:1;font-size:12px;font-weight:500;color:var(--euc-deep)}
+.rsvp-card.cancelled .rsvp-name{text-decoration:line-through;color:var(--taupe)}
+.rsvp-dots{display:flex;gap:2px;margin-right:3px}
+.rsvp-btns{display:flex;gap:3px}
+.rbtn{padding:3px 8px;border-radius:100px;font-size:9px;border:1px solid var(--euc-mist);background:var(--white);cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.15s;font-weight:500}
+.rbtn:hover{border-color:var(--euc-light)}
+.rbtn.ay{background:var(--euc-deep);color:var(--white);border-color:var(--euc-deep)}
+.rbtn.an{background:var(--error);color:var(--white);border-color:var(--error)}
+.rbtn.aw{background:var(--gold);color:var(--white);border-color:var(--gold)}
+.rsvp-del{font-size:10px;color:var(--sand);cursor:pointer;transition:color 0.15s;padding:2px}
+.rsvp-del:hover{color:var(--error)}
+
+.groups-wrap{display:flex;height:100%;gap:0}
+.groups-panel{width:300px;border-right:1px solid var(--euc-mist);background:var(--white);display:flex;flex-direction:column;height:100%}
+.groups-list{flex:1;overflow-y:auto;padding:8px}
+.groups-content{flex:1;overflow-y:auto;padding:14px}
+.group-item{padding:8px 10px;border:1px solid var(--euc-mist);border-radius:var(--radius);margin-bottom:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:7px}
+.group-item:hover{background:var(--euc-whisper);border-color:var(--euc-light)}
+.group-item.active{background:var(--euc-whisper);border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.group-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;border:2px solid rgba(0,0,0,0.08)}
+.group-info{flex:1}
+.group-label{font-size:11px;font-weight:600;color:var(--euc-deep)}
+.group-type{font-size:8px;color:var(--taupe);text-transform:uppercase;letter-spacing:0.4px}
+.group-cnt{font-size:10px;color:var(--taupe)}
+.group-del{font-size:9px;color:var(--taupe);cursor:pointer;opacity:0;transition:opacity 0.15s}
+.group-item:hover .group-del{opacity:1}
+.group-del:hover{color:var(--error)}
+.color-grid{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}
+.color-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.15s}
+.color-swatch:hover{transform:scale(1.15)}
+.color-swatch.active{border-color:var(--charcoal);box-shadow:0 0 0 2px var(--white),0 0 0 3px var(--charcoal)}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(44,48,40,0.4);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(2px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:var(--radius-lg);padding:22px;max-width:380px;width:100%;box-shadow:var(--shadow-lg)}
+.modal h3{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:12px;color:var(--euc-deep)}
+.modal-row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+.modal-row label{font-size:11px;color:var(--euc-mid);min-width:60px;font-weight:500}
+.modal-row select,.modal-row input[type=text],.modal-row input[type=number]{flex:1;padding:6px 10px;border:1px solid var(--euc-mist);border-radius:var(--radius);font-family:'Outfit',sans-serif;font-size:12px;outline:none}
+.modal-row select:focus,.modal-row input:focus{border-color:var(--euc-sage)}
+.modal-btns{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
+
+.toast{position:fixed;bottom:18px;right:18px;padding:7px 16px;background:var(--euc-deep);color:var(--euc-whisper);border-radius:var(--radius);font-size:11px;box-shadow:var(--shadow-lg);z-index:200;animation:ti 0.3s ease}
+@keyframes ti{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+@media print{
+  body{height:auto;overflow:visible;background:#fff!important}
+  body::before{display:none}
+  .tabs,.toolbar,.sidebar,.ibtn,.card-actions,.btn,.card-notes,.search-box,.sidebar-actions{display:none!important}
+  .main-wrap{overflow:visible}
+  .page{display:block!important;height:auto!important}
+  .page-split{height:auto!important}
+  .content-area{overflow:visible;padding:8px}
+  .card{break-inside:avoid;box-shadow:none;border:1px solid #ccc}
+  .card-head{background:#f5f5f5!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .chip,.badge,.cap-badge,.chip-dot{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab active" data-tab="rooms" onclick="go('rooms')">🛏 Kamers</button>
+  <button class="tab" data-tab="tables" onclick="go('tables')">🪑 Tafels</button>
+  <button class="tab" data-tab="floor" onclick="go('floor')">📐 Vloer</button>
+  <button class="tab" data-tab="rsvp" onclick="go('rsvp')">✉ RSVP</button>
+  <button class="tab" data-tab="groups" onclick="go('groups')">👥 Groepe</button>
+</div>
+
+<div class="toolbar tb" id="tb-rooms">
+  <button class="btn btn-primary" onclick="addRoom()">+ Slaapplek</button>
+  <button class="btn btn-gold" onclick="window.print()">🖨 Druk</button>
+  <button class="btn" onclick="exportAll()">💾 Stoor</button>
+  <button class="btn" onclick="importAll()">📂 Laai</button>
+</div>
+<div class="toolbar tb" id="tb-tables" style="display:none">
+  <button class="btn btn-primary" onclick="addTable()">+ Tafel</button>
+  <button class="btn btn-gold" onclick="window.print()">🖨 Druk</button>
+  <button class="btn" onclick="exportAll()">💾 Stoor</button>
+  <button class="btn" onclick="importAll()">📂 Laai</button>
+</div>
+<div class="toolbar tb" id="tb-floor" style="display:none">
+  <button class="btn btn-primary" onclick="addTable()">+ Tafel</button>
+  <button class="btn" onclick="autoLayout()">⊞ Rangskik</button>
+  <button class="btn btn-gold" onclick="window.print()">🖨</button>
+</div>
+<div class="toolbar tb" id="tb-rsvp" style="display:none">
+  <button class="btn btn-primary" onclick="addGuest()">+ Gas</button>
+  <button class="btn" onclick="rsvpAll('confirmed')">✓ Almal Ja</button>
+  <button class="btn" onclick="rsvpAll('pending')">⏳ Almal Hangend</button>
+  <button class="btn btn-gold" onclick="window.print()">🖨</button>
+</div>
+<div class="toolbar tb" id="tb-groups" style="display:none">
+  <button class="btn btn-primary" onclick="addGroup()">+ Groep</button>
+  <button class="btn btn-gold" onclick="window.print()">🖨</button>
+</div>
+
+<div class="main-wrap">
+  <div class="page page-split active" id="pg-rooms">
+    <div class="sidebar"><div class="sidebar-head"><h2>Gaste</h2><div class="count" id="rmC"></div><input class="search-box" id="rmS" placeholder="Soek..." oninput="renderSB('rooms')"></div>
+      <div class="sidebar-actions"><button class="btn btn-sm btn-primary" onclick="addGuest()">+ Gas</button></div>
+      <div class="guest-list" id="rmL"></div></div>
+    <div class="content-area" id="rmA"></div>
+  </div>
+  <div class="page page-split" id="pg-tables">
+    <div class="sidebar"><div class="sidebar-head"><h2>Gaste</h2><div class="count" id="tbC"></div><input class="search-box" id="tbS" placeholder="Soek..." oninput="renderSB('tables')"></div>
+      <div class="sidebar-actions"><button class="btn btn-sm btn-primary" onclick="addGuest()">+ Gas</button></div>
+      <div class="guest-list" id="tbL"></div></div>
+    <div class="content-area" id="tbA"></div>
+  </div>
+  <div class="page" id="pg-floor" style="flex-direction:column"><div class="floor-container" id="flA"></div></div>
+  <div class="page" id="pg-rsvp" style="flex-direction:column;overflow-y:auto">
+    <div id="rsvpSt" style="text-align:center;padding:8px;font-size:11px;color:var(--euc-mid)"></div>
+    <div class="rsvp-grid" id="rsvpG"></div>
+  </div>
+  <div class="page" id="pg-groups">
+    <div class="groups-wrap">
+      <div class="groups-panel"><div class="sidebar-head"><h2>Groepe</h2></div><div class="groups-list" id="grpL"></div></div>
+      <div class="groups-content" id="grpC"><div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--sand);font-style:italic;font-size:12px">Kies 'n groep</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal"><div class="modal"><h3 id="mT"></h3><div id="mB"></div><div class="modal-btns"><button class="btn" onclick="closeModal()">Kanselleer</button><button class="btn btn-primary" onclick="confirmModal()">Bevestig</button></div></div></div>
+<input type="file" id="fIn" accept=".json" style="display:none" onchange="handleImport(event)">
+<div id="toastBox"></div>
+
+<script>
+const GC=['#3D5A47','#7A9E7E','#B8963E','#D4A8A0','#5A7A8B','#8B6B5A','#7A5A8B','#5A8B7A','#8B7A3E','#A85A5A','#5A6B8B','#8B5A7A','#C4956A','#6A8B5A','#5A8B8B','#8B5A5A'];
+const TM={'red-ivory':'badge-ri','bungalow':'badge-bc','safari':'badge-st','loft':'badge-lf','custom':'badge-cu'};
+const TL={'red-ivory':'Red Ivory','bungalow':'Bungalow','safari':'Safari Tent','loft':'Loft','custom':'Ander'};
+const GT=[['couple','Paartjie 💑'],['family','Familie 👨‍👩‍👧‍👦'],['bridal','Bridal Party 💐'],['friends','Vriende 🤝'],['custom','Ander']];
+
+const DG=["Hennie","Jolinda","Pa Hennie","Ma Wilna","Tannie Elise","Madi","André","Cherie","Brett","Marlize","Esteé","Braam","Juf. Nicolene","Oom André","Shiné","Joe","Matthys","Juliette","Claude","Elizma","Pieter","Ulandi","Wessel","Metgesel","Ernest","Kriston","FC","Joha","Jonty","Nadine","Francois","Ilse","Melissa","Phillip","Jaco","Vicky","Sylvanno","Samantha","Dean Beetge","Retha","Damon","Margo","Zander","Jacques","Edine","Ryan","Jani","CM","Natasha","Alex","Ankia","Hanno","Ruan Buys","Juan","Beer girl","JC","Chante","AJ","Monique","Braham","Jeanette","Tannie Louise","Tannie Annemarie","Oom Marius","Fielies","Johan","SP","Juanty","Tannie Ansu","Oom Chris","Tannie Tharina *","Spons","Jeanette","Foto","Video","Oom Hendrik","Vrou","Louis","Mariska"];
+
+const DR=[
+{id:'ri7',name:'Red Ivory 7 — Bridal Suite',type:'red-ivory',beds:'Queen & Sleeper Couch',cap:2,notes:'Bridal Suite'},
+{id:'ri5',name:'Red Ivory 5',type:'red-ivory',beds:'Queen & Sleeper Couch',cap:4,notes:''},{id:'ri3',name:'Red Ivory 3',type:'red-ivory',beds:'Queen & Sleeper Couch',cap:4,notes:''},{id:'ri2',name:'Red Ivory 2',type:'red-ivory',beds:'Queen & Sleeper Couch',cap:4,notes:''},
+{id:'ri1',name:'Red Ivory 1',type:'red-ivory',beds:'Queen & 2 Singles',cap:4,notes:''},{id:'ri4',name:'Red Ivory 4',type:'red-ivory',beds:'Queen & 2 Singles',cap:4,notes:''},{id:'ri6',name:'Red Ivory 6',type:'red-ivory',beds:'Queen & 2 Singles',cap:4,notes:''},
+{id:'bc1',name:'Bungalow 1',type:'bungalow',beds:'Queen & Bunks',cap:4,notes:''},{id:'bc2',name:'Bungalow 2',type:'bungalow',beds:'Queen & Bunks',cap:4,notes:''},{id:'bc3',name:'Bungalow 3',type:'bungalow',beds:'Queen & Bunks',cap:4,notes:''},{id:'bc4',name:'Bungalow 4',type:'bungalow',beds:'Queen & Bunks',cap:4,notes:''},{id:'bc5',name:'Bungalow 5',type:'bungalow',beds:'Queen & Bunks',cap:4,notes:''},{id:'bc6',name:'Bungalow 6',type:'bungalow',beds:'Queen & Bunks',cap:4,notes:''},
+{id:'bc7',name:'Bungalow 7',type:'bungalow',beds:'Queen',cap:2,notes:''},{id:'bc8',name:'Bungalow 8',type:'bungalow',beds:'Queen',cap:2,notes:''},
+{id:'st1',name:'Safari Tent 1',type:'safari',beds:'Queen',cap:2,notes:''},{id:'st2',name:'Safari Tent 2',type:'safari',beds:'Queen',cap:2,notes:''},{id:'st3',name:'Safari Tent 3',type:'safari',beds:'Queen',cap:2,notes:''},{id:'st4',name:'Safari Tent 4',type:'safari',beds:'Queen',cap:2,notes:''},{id:'st5',name:'Safari Tent 5',type:'safari',beds:'Queen',cap:2,notes:''},
+{id:'lf1',name:'Loft 1',type:'loft',beds:'2 Singles & Bunks',cap:4,notes:''},{id:'lf2',name:'Loft 2',type:'loft',beds:'4× Bunks',cap:8,notes:''},{id:'lf3',name:'Loft 3',type:'loft',beds:'Queen & 2 Singles',cap:4,notes:''},
+];
+
+let G=[],rv={},rooms=[],rA={},tbls=[],tA={},tP={},grps=[],sel={rooms:new Set(),tables:new Set()},at='rooms',ag=null,mCb=null;
+
+/* PERSISTENCE — Supabase DB (cross-device) with localStorage offline fallback */
+const PLANNER_KEY='seating';
+function sbClient(){try{if(window.isSupabaseConfigured&&window.isSupabaseConfigured()&&window.getSupabaseClient)return window.getSupabaseClient()}catch(e){}return null}
+function stateObj(){return{G,rv,rooms,rA,tbls,tA,tP,grps}}
+function applyState(d){if(!d)return false;G=d.G||[];rv=d.rv||{};rooms=d.rooms||[];rA=d.rA||{};tbls=d.tbls||[];tA=d.tA||{};tP=d.tP||{};grps=d.grps||[];return true}
+
+async function init(){
+  const c=sbClient();let loaded=false;
+  if(c){
+    try{
+      const{data,error}=await c.from('planner').select('value').eq('key',PLANNER_KEY).maybeSingle();
+      if(error)console.warn('Beplanner DB lees-fout:',error.message);
+      else if(data&&data.value)loaded=applyState(data.value);
+    }catch(e){console.warn('Beplanner DB lees-fout:',e)}
+  }
+  if(!loaded)ld(); // localStorage fallback
+  if(!G.length)G=DG.map((n,i)=>({id:i,name:n}));
+  if(!rooms.length)rooms=JSON.parse(JSON.stringify(DR));
+  G.forEach(g=>{if(!rv[g.id])rv[g.id]='pending'});
+  render();
+}
+
+let _svTimer=null;
+function sv(){
+  // Always keep an offline cache in localStorage.
+  try{localStorage.setItem('kw3',JSON.stringify(stateObj()))}catch(e){}
+  // Debounced write to the DB so drag ticks don't spam it.
+  const c=sbClient();if(!c)return; // demo mode: localStorage only
+  clearTimeout(_svTimer);
+  _svTimer=setTimeout(()=>{
+    try{
+      Promise.resolve(c.from('planner').upsert({key:PLANNER_KEY,value:stateObj()},{onConflict:'key'}))
+        .then(({error})=>{if(error)console.warn('Beplanner DB stoor-fout:',error.message)})
+        .catch(e=>console.warn('Beplanner DB stoor-fout:',e));
+    }catch(e){console.warn('Beplanner DB stoor-fout:',e)}
+  },600);
+}
+function ld(){try{const d=JSON.parse(localStorage.getItem('kw3'));if(d)applyState(d)}catch(e){}}
+
+function go(t){at=t;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));['rooms','tables','floor','rsvp','groups'].forEach(p=>{const pg=document.getElementById('pg-'+p);if(pg)pg.classList.toggle('active',p===t);const tb=document.getElementById('tb-'+p);if(tb)tb.style.display=p===t?'flex':'none'});render()}
+
+function render(){
+  if(at==='rooms'){renderSB('rooms');renderCards('rooms')}
+  else if(at==='tables'){renderSB('tables');renderCards('tables')}
+  else if(at==='floor')renderFloor();
+  else if(at==='rsvp')renderRSVP();
+  else if(at==='groups')renderGroups();
+  sv();
+}
+
+function gDot(gid){
+  const gs=grps.filter(g=>g.members.includes(gid));if(!gs.length)return'';
+  const o=['couple','bridal','family','friends','custom'];
+  gs.sort((a,b)=>o.indexOf(a.type)-o.indexOf(b.type));
+  return gs.map(g=>`<span class="chip-dot" style="background:${g.color}" title="${esc(g.name)}"></span>`).join('');
+}
+
+function renderSB(ctx){
+  const q=(document.getElementById(ctx==='rooms'?'rmS':'tbS').value||'').toLowerCase();
+  const assign=ctx==='rooms'?rA:tA;const s=sel[ctx];
+  let html='',cnt=0;
+  G.forEach(g=>{
+    if(rv[g.id]==='cancelled')return;
+    if(assign[g.id]!==undefined)return;
+    if(q&&!g.name.toLowerCase().includes(q)){cnt++;return} // count but hide
+    cnt++;
+    const sc=s.has(g.id)?' selected':'';
+    html+=`<span class="chip${sc}" draggable="true" ondragstart="ds(event,${g.id},'${ctx}')" ondragend="de(event)" onclick="selT(${g.id},'${ctx}')">
+      ${gDot(g.id)}<span class="n">${g.id+1}</span>${esc(g.name)}<span class="chip-x" onclick="event.stopPropagation();deleteGuest(${g.id})" title="Verwyder gas">✕</span></span>`;
+  });
+  // Fix: count only visible unassigned
+  let total=0;G.forEach(g=>{if(rv[g.id]!=='cancelled'&&assign[g.id]===undefined)total++});
+  if(!html)html='<div style="padding:12px;color:var(--sand);font-style:italic;text-align:center;font-size:11px">'+(!total?'Almal geplaas ✓':'Geen resultate')+'</div>';
+  document.getElementById(ctx==='rooms'?'rmL':'tbL').innerHTML=html;
+  document.getElementById(ctx==='rooms'?'rmC':'tbC').textContent=total+' ongeplaas';
+}
+
+function renderCards(ctx){
+  const area=document.getElementById(ctx==='rooms'?'rmA':'tbA');
+  const items=ctx==='rooms'?rooms:tbls;const assign=ctx==='rooms'?rA:tA;
+  if(!items.length){area.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--sand);flex-direction:column;gap:10px;font-style:italic;font-size:12px"><div style="font-size:30px">${ctx==='rooms'?'🛏':'🪑'}</div>Klik + om te begin</div>`;return}
+  let html='';
+  items.forEach(it=>{
+    const gsts=[];Object.entries(assign).forEach(([gi,rid])=>{if(rid===it.id)gsts.push(+gi)});gsts.sort((a,b)=>a-b);
+    const occ=gsts.length,full=occ>=it.cap,over=occ>it.cap;
+    const capCls=over?' over':full?' full':'';
+    const isR=ctx==='rooms';const bc=isR?(TM[it.type]||'badge-cu'):'badge-tbl';const bl=isR?(TL[it.type]||'Ander'):'Tafel';
+    let gh='';if(!occ)gh='<div class="empty">Sleep gaste hierheen</div>';
+    else gsts.forEach(gi=>{const g=G.find(x=>x.id===gi);if(!g)return;
+      gh+=`<span class="chip in-card" draggable="true" ondragstart="ds(event,${gi},'${ctx}')" ondragend="de(event)" onclick="unA(${gi},'${ctx}')">
+        ${gDot(gi)}<span class="n">${gi+1}</span>${esc(g.name)}</span>`;});
+    html+=`<div class="card${over?' over-cap':''}" ondragover="dov(event)" ondragleave="dlv(event)" ondrop="drp(event,'${it.id}','${ctx}')">
+      <div class="card-head">
+        <input class="card-name" value="${esc(it.name)}" onchange="${isR?'rooms':'tbls'}.find(x=>x.id==='${it.id}').name=this.value;sv()">
+        <div class="card-meta"><span class="badge ${bc}">${bl}</span>${isR&&it.beds?`<span style="font-size:8px;color:var(--taupe)">${esc(it.beds)}</span>`:''}
+          <span class="cap-badge${capCls}">${occ}/${it.cap}</span></div>
+        <div class="card-actions">
+          <button class="ibtn" onclick="asSel('${it.id}','${ctx}')" title="Plaas">+</button>
+          <button class="ibtn" onclick="edit${isR?'Room':'Table'}('${it.id}')" title="Wysig">✎</button>
+          <button class="ibtn del" onclick="del${isR?'Room':'Table'}('${it.id}')" title="Verwyder">✕</button>
+        </div></div>
+      ${isR?`<input class="card-notes" placeholder="Notas..." value="${esc(it.notes||'')}" onchange="rooms.find(x=>x.id==='${it.id}').notes=this.value;sv()">`:''}
+      <div class="card-body">${gh}</div></div>`;
+  });
+  area.innerHTML=html;
+}
+
+/* FLOOR */
+function renderFloor(){
+  const a=document.getElementById('flA');
+  if(!tbls.length){a.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--sand);font-style:italic;font-size:12px;flex-direction:column;gap:10px"><div style="font-size:32px">📐</div>Voeg eers tafels by</div>';return}
+  let h='';tbls.forEach((t,i)=>{
+    const gs=[];Object.entries(tA).forEach(([gi,tid])=>{if(tid===t.id)gs.push(+gi)});gs.sort((a,b)=>a-b);
+    const nm=gs.map(gi=>{const g=G.find(x=>x.id===gi);return g?g.name:'?'}).join(', ')||'Leeg';
+    if(!tP[t.id]){const c=5;tP[t.id]={x:50+(i%c)*140,y:50+Math.floor(i/c)*150}}
+    const p=tP[t.id];
+    h+=`<div class="floor-table" id="ft-${t.id}" style="left:${p.x}px;top:${p.y}px" onmousedown="fS(event,'${t.id}')" ontouchstart="fTS(event,'${t.id}')">
+      <div class="ft-circle"><div class="ft-name">${esc(t.name)}</div><div class="ft-count">${gs.length}/${t.cap}</div></div>
+      <div class="ft-guests">${esc(nm)}</div></div>`;
+  });a.innerHTML=h;sv();
+}
+let fD=null,fO={x:0,y:0};
+function fS(e,id){if(e.button!==0)return;e.preventDefault();const el=document.getElementById('ft-'+id);el.classList.add('ftd');const r=el.getBoundingClientRect();fO={x:e.clientX-r.left,y:e.clientY-r.top};fD=id;document.addEventListener('mousemove',fM);document.addEventListener('mouseup',fE)}
+function fM(e){if(!fD)return;const c=document.getElementById('flA'),cr=c.getBoundingClientRect();let x=e.clientX-cr.left-fO.x+c.scrollLeft,y=e.clientY-cr.top-fO.y+c.scrollTop;const el=document.getElementById('ft-'+fD);el.style.left=Math.max(0,x)+'px';el.style.top=Math.max(0,y)+'px';tP[fD]={x:Math.max(0,x),y:Math.max(0,y)}}
+function fE(){if(fD){document.getElementById('ft-'+fD).classList.remove('ftd');fD=null;sv()}document.removeEventListener('mousemove',fM);document.removeEventListener('mouseup',fE)}
+function fTS(e,id){const tc=e.touches[0];const el=document.getElementById('ft-'+id);el.classList.add('ftd');const r=el.getBoundingClientRect();fO={x:tc.clientX-r.left,y:tc.clientY-r.top};fD=id;const mv=ev=>{ev.preventDefault();const t=ev.touches[0],c=document.getElementById('flA'),cr=c.getBoundingClientRect();let x=t.clientX-cr.left-fO.x+c.scrollLeft,y=t.clientY-cr.top-fO.y+c.scrollTop;el.style.left=Math.max(0,x)+'px';el.style.top=Math.max(0,y)+'px';tP[fD]={x:Math.max(0,x),y:Math.max(0,y)}};const en=()=>{el.classList.remove('ftd');fD=null;sv();document.removeEventListener('touchmove',mv);document.removeEventListener('touchend',en)};document.addEventListener('touchmove',mv,{passive:false});document.addEventListener('touchend',en)}
+function autoLayout(){const c=Math.ceil(Math.sqrt(tbls.length));tbls.forEach((t,i)=>{tP[t.id]={x:60+(i%c)*150,y:60+Math.floor(i/c)*160}});renderFloor();toast('Klaar')}
+
+/* RSVP */
+function renderRSVP(){
+  const y=G.filter(g=>rv[g.id]==='confirmed').length,n=G.filter(g=>rv[g.id]==='cancelled').length,w=G.filter(g=>rv[g.id]==='pending').length;
+  document.getElementById('rsvpSt').innerHTML=`<strong>${G.length}</strong> gaste · ✓ <strong>${y}</strong> bevestig · ⏳ <strong>${w}</strong> hangend · ✕ <strong>${n}</strong> gekanselleer`;
+  let h='';G.forEach(g=>{
+    const s=rv[g.id]||'pending';
+    h+=`<div class="rsvp-card${s==='cancelled'?' cancelled':''}">
+      <div class="rsvp-num">${g.id+1}</div><div class="rsvp-dots">${gDot(g.id)}</div>
+      <div class="rsvp-name">${esc(g.name)}</div>
+      <div class="rsvp-btns">
+        <button class="rbtn ${s==='confirmed'?'ay':''}" onclick="setRV(${g.id},'confirmed')">✓</button>
+        <button class="rbtn ${s==='pending'?'aw':''}" onclick="setRV(${g.id},'pending')">⏳</button>
+        <button class="rbtn ${s==='cancelled'?'an':''}" onclick="setRV(${g.id},'cancelled')">✕</button>
+      </div>
+      <span class="rsvp-del" onclick="deleteGuest(${g.id})" title="Verwyder gas">🗑</span>
+    </div>`;
+  });document.getElementById('rsvpG').innerHTML=h;
+}
+function setRV(gid,s){rv[gid]=s;if(s==='cancelled'){const g=G.find(x=>x.id===gid);if(rA[gid]!==undefined){delete rA[gid];toast((g?g.name:'')+' uit kamer')}if(tA[gid]!==undefined){delete tA[gid];toast((g?g.name:'')+' van tafel')}}render()}
+function rsvpAll(s){G.forEach(g=>{if(s==='cancelled'){setRV(g.id,s)}else{rv[g.id]=s}});render();toast(s==='confirmed'?'Almal bevestig':'Almal hangend')}
+
+/* GROUPS */
+function renderGroups(){
+  let h='';grps.forEach(g=>{
+    const tl=GT.find(t=>t[0]===g.type);
+    h+=`<div class="group-item${ag===g.id?' active':''}" onclick="ag='${g.id}';renderGroups()">
+      <span class="group-dot" style="background:${g.color}"></span>
+      <div class="group-info"><div class="group-label">${esc(g.name)}</div><div class="group-type">${tl?tl[1]:g.type}</div></div>
+      <span class="group-cnt">${g.members.length}</span>
+      <span class="group-del" onclick="event.stopPropagation();delGrp('${g.id}')" title="Verwyder">✕</span></div>`;
+  });if(!grps.length)h='<div style="padding:16px;text-align:center;color:var(--sand);font-size:11px;font-style:italic">Geen groepe nog</div>';
+  document.getElementById('grpL').innerHTML=h;renderGrpDetail();
+}
+function renderGrpDetail(){
+  const c=document.getElementById('grpC');
+  if(!ag){c.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--sand);font-style:italic;font-size:12px">Kies \'n groep</div>';return}
+  const g=grps.find(x=>x.id===ag);if(!g){c.innerHTML='';return}
+  const tl=GT.find(t=>t[0]===g.type);
+  let mh='';g.members.forEach(mid=>{const gst=G.find(x=>x.id===mid);if(!gst)return;
+    mh+=`<span class="chip in-card" onclick="rmGrpM('${g.id}',${mid})"><span class="chip-dot" style="background:${g.color}"></span><span class="n">${mid+1}</span>${esc(gst.name)}<span class="chip-x">✕</span></span>`;});
+  if(!g.members.length)mh='<div style="color:var(--sand);font-size:10px;font-style:italic;padding:6px">Klik op gaste hieronder</div>';
+  let ah='';G.forEach(gst=>{if(g.members.includes(gst.id)||rv[gst.id]==='cancelled')return;
+    ah+=`<span class="chip" onclick="addGrpM('${g.id}',${gst.id})">${gDot(gst.id)}<span class="n">${gst.id+1}</span>${esc(gst.name)}</span>`;});
+  c.innerHTML=`<div style="margin-bottom:12px">
+    <h3 style="font-family:'Playfair Display',serif;font-size:16px;color:var(--euc-deep)"><span class="chip-dot" style="background:${g.color};display:inline-block;width:10px;height:10px;vertical-align:middle;margin-right:4px"></span>${esc(g.name)}</h3>
+    <p style="font-size:10px;color:var(--taupe)">${tl?tl[1]:g.type} · ${g.members.length} lede</p>
+    <div class="color-grid" id="cgrid">${GC.map(cl=>`<span class="color-swatch${g.color===cl?' active':''}" style="background:${cl}" onclick="grps.find(x=>x.id==='${g.id}').color='${cl}';render()"></span>`).join('')}</div></div>
+    <div><h4 style="font-size:10px;color:var(--euc-mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px">Lede</h4>${mh}</div>
+    <div style="margin-top:14px;border-top:1px solid var(--euc-mist);padding-top:10px"><h4 style="font-size:10px;color:var(--euc-mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px">Klik om by te voeg</h4><div>${ah||'<span style="color:var(--sand);font-size:10px;font-style:italic">Almal reeds in groep</span>'}</div></div>`;
+}
+function addGrpM(gid,mid){const g=grps.find(x=>x.id===gid);if(g&&!g.members.includes(mid)){g.members.push(mid);render()}}
+function rmGrpM(gid,mid){const g=grps.find(x=>x.id===gid);if(g){g.members=g.members.filter(m=>m!==mid);render()}}
+function delGrp(id){if(!confirm('Verwyder groep?'))return;grps=grps.filter(g=>g.id!==id);if(ag===id)ag=null;render();toast('Groep verwyder')}
+function addGroup(){
+  showModal('Nuwe Groep',`<div class="modal-row"><label>Naam</label><input type="text" id="mgN" placeholder="bv. Bruid & Bruidegom"></div>
+    <div class="modal-row"><label>Tipe</label><select id="mgT">${GT.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('')}</select></div>
+    <div><label style="font-size:10px;color:var(--euc-mid);font-weight:500">Kleur</label>
+    <div class="color-grid" id="mgC">${GC.map((c,i)=>`<span class="color-swatch${i===0?' active':''}" style="background:${c}" data-c="${c}" onclick="document.querySelectorAll('#mgC .color-swatch').forEach(s=>s.classList.remove('active'));this.classList.add('active')"></span>`).join('')}</div></div>`,
+  ()=>{const ce=document.querySelector('#mgC .color-swatch.active');
+    const g={id:'g_'+Date.now(),name:document.getElementById('mgN').value.trim()||'Groep',type:document.getElementById('mgT').value,color:ce?ce.dataset.c:GC[0],members:[]};
+    grps.push(g);ag=g.id;render();toast('Groep geskep')});
+}
+
+/* GUEST MANAGEMENT */
+function addGuest(){showModal('Voeg Gas By',`<div class="modal-row"><label>Naam</label><input type="text" id="mgName" placeholder="Naam"></div>`,()=>{
+  const n=document.getElementById('mgName').value.trim();if(!n){toast('Voer naam in');return}
+  const mx=G.reduce((m,g)=>Math.max(m,g.id),-1);const id=mx+1;G.push({id,name:n});rv[id]='pending';render();toast(n+' bygevoeg')})}
+function deleteGuest(gid){const g=G.find(x=>x.id===gid);if(!g||!confirm(`Verwyder ${g.name}?`))return;
+  G=G.filter(x=>x.id!==gid);delete rv[gid];delete rA[gid];delete tA[gid];
+  grps.forEach(gr=>{gr.members=gr.members.filter(m=>m!==gid)});sel.rooms.delete(gid);sel.tables.delete(gid);render();toast(g.name+' verwyder')}
+
+/* DRAG & DROP */
+let dGI=null,dCx=null;
+function ds(e,gi,cx){dGI=gi;dCx=cx;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',gi)}
+function de(e){e.target.classList.remove('dragging');dGI=null;dCx=null;document.querySelectorAll('.card').forEach(c=>c.classList.remove('drag-over'))}
+function dov(e){e.preventDefault();e.currentTarget.classList.add('drag-over')}
+function dlv(e){e.currentTarget.classList.remove('drag-over')}
+function drp(e,tid,cx){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(dGI===null||dCx!==cx)return;
+  const a=cx==='rooms'?rA:tA;const items=cx==='rooms'?rooms:tbls;const t=items.find(x=>x.id===tid);if(!t)return;
+  const occ=Object.values(a).filter(id=>id===tid).length;if(occ>=t.cap&&!confirm(`Vol (${occ}/${t.cap}). Plaas tog?`))return;
+  a[dGI]=tid;render();const g=G.find(x=>x.id===dGI);toast((g?g.name:'')+' geplaas')}
+function selT(gi,cx){const s=sel[cx];s.has(gi)?s.delete(gi):s.add(gi);renderSB(cx)}
+function asSel(tid,cx){const s=sel[cx];const a=cx==='rooms'?rA:tA;if(!s.size){toast('Kies eers gaste');return}s.forEach(gi=>{a[gi]=tid});s.clear();render();toast('Geplaas')}
+function unA(gi,cx){const a=cx==='rooms'?rA:tA;delete a[gi];render();const g=G.find(x=>x.id===gi);toast((g?g.name:'')+' verwyder')}
+
+/* ROOM CRUD */
+function addRoom(){showModal('Nuwe Slaapplek',`
+  <div class="modal-row"><label>Naam</label><input type="text" id="mrN" placeholder="bv. Extra Tent"></div>
+  <div class="modal-row"><label>Tipe</label><select id="mrT"><option value="red-ivory">Red Ivory</option><option value="bungalow">Bungalow</option><option value="safari">Safari Tent</option><option value="loft">Loft</option><option value="custom" selected>Ander</option></select></div>
+  <div class="modal-row"><label>Beddens</label><input type="text" id="mrB" placeholder="bv. Queen & Bunks"></div>
+  <div class="modal-row"><label>Kapasiteit</label><input type="number" id="mrC" min="1" max="20" value="2"></div>`,
+  ()=>{rooms.push({id:'rm_'+Date.now(),name:document.getElementById('mrN').value.trim()||'Kamer',type:document.getElementById('mrT').value,beds:document.getElementById('mrB').value.trim(),cap:Math.max(1,+document.getElementById('mrC').value||2),notes:''});render();toast('Bygevoeg')})}
+function editRoom(id){const r=rooms.find(x=>x.id===id);if(!r)return;showModal('Wysig Kamer',`
+  <div class="modal-row"><label>Naam</label><input type="text" id="mrN" value="${esc(r.name)}"></div>
+  <div class="modal-row"><label>Tipe</label><select id="mrT">${Object.entries(TL).map(([k,v])=>`<option value="${k}"${r.type===k?' selected':''}>${v}</option>`).join('')}</select></div>
+  <div class="modal-row"><label>Beddens</label><input type="text" id="mrB" value="${esc(r.beds||'')}"></div>
+  <div class="modal-row"><label>Kapasiteit</label><input type="number" id="mrC" min="1" max="20" value="${r.cap}"></div>`,
+  ()=>{r.name=document.getElementById('mrN').value.trim()||r.name;r.type=document.getElementById('mrT').value;r.beds=document.getElementById('mrB').value.trim();r.cap=Math.max(1,+document.getElementById('mrC').value||2);render();toast('Gewysig')})}
+function delRoom(id){if(!confirm('Verwyder?'))return;Object.keys(rA).forEach(gi=>{if(rA[gi]===id)delete rA[gi]});rooms=rooms.filter(r=>r.id!==id);render();toast('Verwyder')}
+
+/* TABLE CRUD */
+function addTable(){showModal('Nuwe Tafel',`
+  <div class="modal-row"><label>Naam</label><input type="text" id="mtN" value="Tafel ${tbls.length+1}"></div>
+  <div class="modal-row"><label>Sitplekke</label><input type="number" id="mtC" min="1" max="20" value="8"></div>`,
+  ()=>{tbls.push({id:'t_'+Date.now(),name:document.getElementById('mtN').value.trim()||'Tafel',cap:Math.max(1,+document.getElementById('mtC').value||8)});render();toast('Tafel bygevoeg')})}
+function editTable(id){const t=tbls.find(x=>x.id===id);if(!t)return;showModal('Wysig Tafel',`
+  <div class="modal-row"><label>Naam</label><input type="text" id="mtN" value="${esc(t.name)}"></div>
+  <div class="modal-row"><label>Sitplekke</label><input type="number" id="mtC" min="1" max="20" value="${t.cap}"></div>`,
+  ()=>{t.name=document.getElementById('mtN').value.trim()||t.name;t.cap=Math.max(1,+document.getElementById('mtC').value||8);render();toast('Gewysig')})}
+function delTable(id){if(!confirm('Verwyder?'))return;Object.keys(tA).forEach(gi=>{if(tA[gi]===id)delete tA[gi]});delete tP[id];tbls=tbls.filter(t=>t.id!==id);render();toast('Verwyder')}
+
+/* MODAL */
+function showModal(t,body,cb){document.getElementById('mT').textContent=t;document.getElementById('mB').innerHTML=body;mCb=cb;document.getElementById('modal').classList.add('open');const fi=document.querySelector('#mB input');if(fi)setTimeout(()=>{fi.focus();fi.select()},80)}
+function closeModal(){document.getElementById('modal').classList.remove('open');mCb=null}
+function confirmModal(){if(mCb)mCb();closeModal()}
+
+/* EXPORT/IMPORT */
+function exportAll(){const d={G,rv,rooms,rA,tbls,tA,tP,grps,at:new Date().toISOString()};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kuthaba_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href);toast('Gestoor')}
+function importAll(){document.getElementById('fIn').click()}
+function handleImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.G)G=d.G;if(d.rv)rv=d.rv;if(d.rooms)rooms=d.rooms;if(d.rA)rA=d.rA;if(d.tbls)tbls=d.tbls;if(d.tA)tA=d.tA;if(d.tP)tP=d.tP;if(d.grps)grps=d.grps;render();toast('Gelaai')}catch(err){toast('Fout')}};r.readAsText(f);e.target.value=''}
+
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.getElementById('toastBox').appendChild(t);setTimeout(()=>t.remove(),2000)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+if(location.search.indexOf('embed')>=0)document.body.classList.add('embed');
+init().catch(e=>{console.warn('Beplanner init-fout:',e);try{render()}catch(_){}});
+</script>
+</body>
+</html>

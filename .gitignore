@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Omgewing-geheime (MOENIE hierdie na git stuur nie)
+.env
+.env.local
+public/assets/js/secrets.js
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Groot oorspronklike foto's (ons gebruik net die geoptimaliseerde weergawes)
+images-src/
+*.zip
+
+# Oorspronklike Claude Design-uitvoer (verwysing — hou plaaslik, hoef nie op GitHub nie)
+design-import/
+
+# Bou-uitset
+.netlify/
+.vercel/
