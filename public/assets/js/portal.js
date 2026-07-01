@@ -374,15 +374,30 @@
   function setupRsvp() {
     const form = $("#rsvp-form");
     if (!form) return;
-    const max = Math.max(1, Math.min(12, parseInt(content.rsvp_max, 10) || 6));
-    // naamvelde
+    const max = Math.max(1, Math.min(12, parseInt(content.rsvp_max, 10) || 4));
+    // naamvelde: begin met een, en 'n "+"-knoppie voeg meer by tot by die maksimum
     const gv = $("#gaste-velde");
-    for (let i = 0; i < max; i++) {
+    gv.innerHTML = "";
+    let gasteCount = 0;
+    function addGasteField(first) {
       const inp = document.createElement("input");
-      inp.className = "rin"; inp.dataset.gas = String(i);
-      inp.placeholder = i === 0 ? "Naam & van" : ("Gas " + (i + 1) + " (opsioneel)");
+      inp.className = "rin"; inp.dataset.gas = String(gasteCount);
+      inp.placeholder = first ? "Naam & van" : ("Gas " + (gasteCount + 1));
       gv.appendChild(inp);
+      gasteCount++;
     }
+    addGasteField(true);
+    const addGasBtn = document.createElement("button");
+    addGasBtn.type = "button"; addGasBtn.className = "rsvp-addgas";
+    addGasBtn.textContent = "+ Voeg nog 'n gas by";
+    addGasBtn.addEventListener("click", () => {
+      if (gasteCount >= max) return;
+      addGasteField(false);
+      $$("#gaste-velde [data-gas]").slice(-1)[0].focus();
+      if (gasteCount >= max) addGasBtn.style.display = "none";
+    });
+    if (max <= 1) addGasBtn.style.display = "none";
+    gv.parentNode.appendChild(addGasBtn);
     $("#seats-hint").textContent = max > 1 ? "(tot " + max + " gaste)" : "";
 
     // kom ja/nee
@@ -475,7 +490,8 @@
 
     if (!client) { console.info("DEMO RSVP:", record); done(true); return; }
     try {
-      const { error } = await client.from("rsvps").insert([record]);
+      // stoor via 'n funksie wat op client_id opdateer — 'n wysiging vervang dieselfde ry (geen duplikate)
+      const { error } = await client.rpc("save_rsvp", { p_client_id: getClientId(), p_data: record });
       if (error) throw error;
       done(false);
     } catch (err) {
@@ -483,6 +499,21 @@
       showErr("Ag nee, iets het verkeerd geloop. Probeer asseblief weer.");
       btn.disabled = false; btn.textContent = lbl;
     }
+  }
+
+  // Een stabiele ID per toestel sodat 'n gas se latere wysiging dieselfde RSVP-ry opdateer.
+  function makeUuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0, v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+  function getClientId() {
+    let id = null;
+    try { id = localStorage.getItem("hj_rsvp_cid"); } catch (e) {}
+    if (!id) { id = makeUuid(); try { localStorage.setItem("hj_rsvp_cid", id); } catch (e) {} }
+    return id;
   }
 
   /* ---- begin ---- */

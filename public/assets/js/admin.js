@@ -264,6 +264,7 @@
       dieet: r.dieet || "",
       liedjies: Array.isArray(r.liedjies) ? r.liedjies : safeArr(r.liedjies),
       boodskap: r.boodskap || "",
+      ekstra: r.ekstra || {},
       created_at: r.created_at || null
     };
   }
@@ -1354,6 +1355,25 @@
       show(mWrap);
       $("d-msg").textContent = "“" + r.boodskap.trim() + "”";
     } else { hide(mWrap); }
+
+    // verwyder-knoppie (bv. om duplikate/toets-inskrywings te verwyder)
+    var delBtn = $("d-delete");
+    if (delBtn) {
+      delBtn.disabled = false; delBtn.textContent = "Verwyder hierdie RSVP";
+      delBtn.onclick = function () {
+        if (!window.confirm("Verwyder hierdie RSVP permanent? Dit kan nie ongedaan gemaak word nie.")) return;
+        delBtn.disabled = true; delBtn.textContent = "Verwyder tans…";
+        Promise.resolve(sb.from("rsvps").delete().eq("id", r.id))
+          .then(function (res) {
+            if (res && res.error) throw res.error;
+            closeDetail(); toast("RSVP verwyder"); loadRsvps();
+          })
+          .catch(function (e) {
+            console.error(e); delBtn.disabled = false; delBtn.textContent = "Verwyder hierdie RSVP";
+            toast("Kon nie verwyder nie");
+          });
+      };
+    }
 
     show($("detail-overlay"));
   }

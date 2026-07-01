@@ -260,6 +260,8 @@ textarea.rin:focus{border-color:var(--sage)}
 .rsvp-songs{display:flex;flex-direction:column;gap:14px}
 .rsvp-song{display:flex;align-items:center;gap:14px}
 .rsvp-song b{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--gold2);width:18px;flex-shrink:0}
+.rsvp-addgas{margin-top:12px;background:none;border:1px dashed rgba(79,93,58,.5);color:var(--olive);font-family:var(--sans);font-size:12px;letter-spacing:1px;padding:10px 16px;border-radius:3px;cursor:pointer;transition:all .2s}
+.rsvp-addgas:hover{background:rgba(79,93,58,.07);border-color:var(--olive)}
 .rsvp-thanks{text-align:center;padding:30px 10px}
 .rsvp-thanks .seal{width:84px;height:84px;border-radius:50%;border:1px solid rgba(185,167,126,.6);margin:0 auto;display:flex;align-items:center;justify-content:center;position:relative}
 .rsvp-thanks .seal i{position:absolute;inset:6px;border-radius:50%;border:1px solid rgba(185,167,126,.3)}

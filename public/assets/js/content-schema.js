@@ -114,8 +114,8 @@ window.CONTENT_SCHEMA = [
   // ───── RSVP ─────
   { key:"rsvp_intro", label:"RSVP — onderskrif", type:"textarea", group:"RSVP",
     default:"Ons kan nie wag om dit saam met jou te vier nie." },
-  { key:"rsvp_max", label:"RSVP — maks. gaste per antwoord", type:"text", group:"RSVP", default:"6",
-    help:"Hoeveel naamvelde wys op die RSVP-vorm." },
+  { key:"rsvp_max", label:"RSVP — maks. gaste per antwoord", type:"text", group:"RSVP", default:"4",
+    help:"Hoeveel gaste 'n gas kan byvoeg (die \"+ Voeg gas by\"-knoppie stop hier). Bv. 4." },
   // Eie RSVP-vrae wat jy kan byvoeg/verwyder. Elke item: {vraag, tipe:"kort"|"lank"}.
   { key:"rsvp_extra", label:"RSVP — eie vrae", type:"blocks", group:"RSVP", default: "[]",
     help:"Voeg jou eie vrae by; gaste se antwoorde wys in die Gaste-besonderhede." },
