@@ -73,6 +73,7 @@
     { id: "vloer", naam: "Vloer", view: "planner", planner: "floor" },
     { id: "groepe", naam: "Groepe", view: "planner", planner: "groups" },
     { id: "teks", naam: "Redigeer teks", view: "teks" },
+    { id: "rsvp-teks", naam: "RSVP", view: "rsvp-teks" },
     { id: "instellings", naam: "Instellings", view: "instellings" }
   ];
   var PLANNER_META = {
@@ -923,14 +924,33 @@
 
     // Instellings-tab: net die "Instellings"-groep
     var sBox = $("settings-fields");
-    sBox.textContent = "";
-    var settingsFields = schema.filter(function (f) { return f.group === "Instellings"; });
-    if (settingsFields.length) {
-      sBox.appendChild(buildPanel("Instellings", settingsFields, "settings"));
+    if (sBox) {
+      sBox.textContent = "";
+      var settingsFields = schema.filter(function (f) { return f.group === "Instellings"; });
+      if (settingsFields.length) {
+        sBox.appendChild(buildPanel("Instellings", settingsFields, "settings"));
+      }
+    }
+
+    // RSVP-tab: net die teks/textarea-velde van die "RSVP"-groep
+    // (slaan blokke/beelde/galery — bv. rsvp_extra — oor; dié word op die werf self bygevoeg)
+    var rBox = $("rsvp-fields");
+    if (rBox) {
+      rBox.textContent = "";
+      var rsvpFields = schema.filter(function (f) {
+        return f.group === "RSVP" && (f.type === "text" || f.type === "textarea");
+      });
+      if (rsvpFields.length) {
+        var rPanel = buildPanel("RSVP", rsvpFields, "rsvp");
+        rPanel.appendChild(el("p", "content-field-help",
+          "Eie/bygevoegde vrae word op die werf self bygevoeg (Redigeer teks → RSVP → ✎ Voeg eie RSVP-vrae)."));
+        rBox.appendChild(rPanel);
+      }
     }
 
     if ($("content-save")) wireContentSave("content-save", "content-status", "content");
     wireContentSave("settings-save", "settings-status", "settings");
+    wireContentSave("rsvp-save", "rsvp-status", "rsvp");
   }
 
   function buildPanel(title, fields, scope) {

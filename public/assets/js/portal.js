@@ -371,18 +371,25 @@
 
   /* ---- RSVP ---- */
   const rsvp = { kom: null, slaap: null, naweek: "", ontbyt: null };
+  // Kies 'n inhoud-waarde, val terug op 'n verstek as dit leeg is.
+  function ctext(key, fallback) {
+    const v = content[key];
+    return (v != null && String(v).trim() !== "") ? String(v) : fallback;
+  }
   function setupRsvp() {
     const form = $("#rsvp-form");
     if (!form) return;
     const max = Math.max(1, Math.min(12, parseInt(content.rsvp_max, 10) || 4));
+    const naamPh = ctext("rsvp_ph_naam", "Naam & van");
     // naamvelde: begin met een, en 'n "+"-knoppie voeg meer by tot by die maksimum
     const gv = $("#gaste-velde");
+    if (!gv) return;
     gv.innerHTML = "";
     let gasteCount = 0;
     function addGasteField(first) {
       const inp = document.createElement("input");
       inp.className = "rin"; inp.dataset.gas = String(gasteCount);
-      inp.placeholder = first ? "Naam & van" : ("Gas " + (gasteCount + 1));
+      inp.placeholder = first ? naamPh : ("Gas " + (gasteCount + 1));
       gv.appendChild(inp);
       gasteCount++;
     }
@@ -398,7 +405,28 @@
     });
     if (max <= 1) addGasBtn.style.display = "none";
     gv.parentNode.appendChild(addGasBtn);
-    $("#seats-hint").textContent = max > 1 ? "(tot " + max + " gaste)" : "";
+    const seatsHint = $("#seats-hint");
+    if (seatsHint) seatsHint.textContent = max > 1 ? "(tot " + max + " gaste)" : "";
+
+    // plekhouers vir die vrye-teks-velde uit inhoud
+    const dieetEl = $("#dieet");
+    if (dieetEl) dieetEl.placeholder = ctext("rsvp_ph_dieet", "Bv. glutenvry, vegetaries, neut-allergie…");
+    const liedPh = ctext("rsvp_ph_lied", "Naam of skakel");
+    ["#lied0", "#lied1", "#lied2"].forEach(function (sel) {
+      const li = $(sel); if (li) li.placeholder = liedPh;
+    });
+    const boodJa = $("#boodskap-ja");
+    if (boodJa) boodJa.placeholder = ctext("rsvp_ph_boodskap", "Deel 'n wens, 'n grappie of net liefde…");
+
+    // stuur- en wysig-knoppie-teks uit inhoud
+    const submitBtn = $("#rsvp-submit");
+    if (submitBtn) submitBtn.textContent = ctext("rsvp_submit", "Stuur antwoord");
+    const editBtn = $("#rsvp-edit");
+    if (editBtn) {
+      editBtn.textContent = ctext("rsvp_wysig", "Wysig my antwoord");
+      const allowEdit = String(content.rsvp_allow_edit == null ? "ja" : content.rsvp_allow_edit).trim().toLowerCase();
+      editBtn.style.display = (allowEdit === "nee") ? "none" : "";
+    }
 
     // kom ja/nee
     $$(".choice[data-kom]", form).forEach((b) => b.addEventListener("click", () => {
@@ -431,8 +459,9 @@
     }));
 
     form.addEventListener("submit", onSubmit);
-    $("#rsvp-edit").addEventListener("click", () => {
-      $("#rsvp-thanks").classList.add("hidden");
+    if (editBtn) editBtn.addEventListener("click", () => {
+      const th = $("#rsvp-thanks");
+      if (th) th.classList.add("hidden");
       form.classList.remove("hidden");
     });
   }
@@ -476,10 +505,12 @@
     function done(demo) {
       btn.disabled = false; btn.textContent = lbl; // herstel knoppie vir "Wysig my antwoord"
       const t = $("#rsvp-thanks");
-      $("#rsvp-thanks-h").textContent = rsvp.kom ? "Baie dankie!" : "Dankie dat jy laat weet";
+      $("#rsvp-thanks-h").textContent = rsvp.kom
+        ? ctext("rsvp_dankie_ja_h", "Baie dankie!")
+        : ctext("rsvp_dankie_nee_h", "Dankie dat jy laat weet");
       const base = rsvp.kom
-        ? "Ons het julle RSVP ontvang. Ons kan nie wag om saam met julle te vier op 7 November 2026 nie!"
-        : "Ons gaan jou mis, maar verstaan heeltemal. Geniet jou dag — met liefde, Hennie & Jolinda.";
+        ? ctext("rsvp_dankie_ja", "Ons het julle RSVP ontvang. Ons kan nie wag om saam met julle te vier op 7 November 2026 nie!")
+        : ctext("rsvp_dankie_nee", "Ons gaan jou mis, maar verstaan heeltemal. Geniet jou dag — met liefde, Hennie & Jolinda.");
       $("#rsvp-thanks-p").textContent = demo
         ? base + " (Demo-modus: nog nie gestoor nie — stel Supabase op om antwoorde te stoor.)"
         : base;
