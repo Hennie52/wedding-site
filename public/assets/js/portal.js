@@ -533,8 +533,10 @@
     // plekhouers vir die vrye-teks-velde uit inhoud
     const eposEl = $("#epos");
     if (eposEl) eposEl.placeholder = ctext("rsvp_ph_epos", "naam@voorbeeld.co.za");
+    const eposNeeEl = $("#epos-nee");
+    if (eposNeeEl) eposNeeEl.placeholder = ctext("rsvp_ph_epos", "naam@voorbeeld.co.za");
     const naamNeeEl = $("#naam-nee");
-    if (naamNeeEl) naamNeeEl.placeholder = ctext("rsvp_ph_naam", "Naam & van");
+    if (naamNeeEl) naamNeeEl.placeholder = ctext("rsvp_nee_naam_label", "Naam en Van");
     const dieetEl = $("#dieet");
     if (dieetEl) dieetEl.placeholder = ctext("rsvp_ph_dieet", "Bv. glutenvry, vegetaries, neut-allergie…");
     const liedPh = ctext("rsvp_ph_lied", "Naam of skakel");
@@ -624,8 +626,11 @@
     } else {
       const naamNee = ($("#naam-nee").value || "").trim();
       if (!naamNee) { showErr("Laat weet ons asseblief wie jy is — vul jou naam en van in."); return; }
+      const eposNee = ($("#epos-nee").value || "").trim();
+      if (!eposNee) { showErr("Vul asseblief jou e-posadres in sodat ons jou kan bereik."); return; }
+      if (!isEmail(eposNee)) { showErr("Daardie e-posadres lyk nie heeltemal reg nie — kyk asseblief weer."); return; }
       record = {
-        lead_naam: naamNee, epos: "", gaste: [], aantal: 0, kom: false,
+        lead_naam: naamNee, epos: eposNee, gaste: [], aantal: 0, kom: false,
         slaap: false, naweek: "", ontbyt: false, dieet: "",
         liedjies: [], boodskap: $("#boodskap-nee").value.trim(), ekstra: {},
       };

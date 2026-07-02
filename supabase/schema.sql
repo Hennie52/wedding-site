@@ -38,25 +38,51 @@ alter table public.rsvps add column if not exists client_id uuid;
 create unique index if not exists rsvps_client_id_key on public.rsvps (client_id);
 create index if not exists rsvps_created_at_idx on public.rsvps (created_at desc);
 
--- Funksie waardeur gaste hul RSVP stoor (voeg by OF dateer op volgens client_id).
+-- Funksie waardeur gaste hul RSVP stoor.
+-- Dit soek 'n bestaande inskrywing EERS volgens e-pos (sodat 'n gas se antwoord op
+-- enige toestel dieselfde ry opdateer — bv. van "Ja" na "Nee") en anders volgens
+-- toestel (client_id). Slegs as niks pas nie word 'n nuwe ry bygevoeg.
 create or replace function public.save_rsvp(p_client_id uuid, p_data jsonb)
 returns void language plpgsql security definer set search_path = public as $func$
+declare
+  v_epos text := nullif(lower(trim(coalesce(p_data->>'epos',''))), '');
+  v_id   bigint;
 begin
-  insert into public.rsvps
-    (client_id, lead_naam, epos, gaste, aantal, kom, slaap, naweek, ontbyt, dieet, liedjies, boodskap, ekstra)
-  values (
-    p_client_id,
-    coalesce(p_data->>'lead_naam',''), coalesce(p_data->>'epos',''), coalesce(p_data->'gaste','[]'::jsonb),
-    coalesce((p_data->>'aantal')::int,0), coalesce((p_data->>'kom')::boolean,true),
-    coalesce((p_data->>'slaap')::boolean,false), coalesce(p_data->>'naweek',''),
-    coalesce((p_data->>'ontbyt')::boolean,false), coalesce(p_data->>'dieet',''),
-    coalesce(p_data->'liedjies','[]'::jsonb), coalesce(p_data->>'boodskap',''),
-    coalesce(p_data->'ekstra','{}'::jsonb)
-  )
-  on conflict (client_id) do update set
-    lead_naam=excluded.lead_naam, epos=excluded.epos, gaste=excluded.gaste, aantal=excluded.aantal,
-    kom=excluded.kom, slaap=excluded.slaap, naweek=excluded.naweek, ontbyt=excluded.ontbyt,
-    dieet=excluded.dieet, liedjies=excluded.liedjies, boodskap=excluded.boodskap, ekstra=excluded.ekstra;
+  if v_epos is not null then
+    select id into v_id from public.rsvps where lower(trim(epos)) = v_epos order by id asc limit 1;
+  end if;
+  if v_id is null then
+    select id into v_id from public.rsvps where client_id = p_client_id order by id asc limit 1;
+  end if;
+
+  if v_id is not null then
+    update public.rsvps set
+      lead_naam = coalesce(p_data->>'lead_naam',''),
+      epos      = coalesce(p_data->>'epos',''),
+      gaste     = coalesce(p_data->'gaste','[]'::jsonb),
+      aantal    = coalesce((p_data->>'aantal')::int,0),
+      kom       = coalesce((p_data->>'kom')::boolean,true),
+      slaap     = coalesce((p_data->>'slaap')::boolean,false),
+      naweek    = coalesce(p_data->>'naweek',''),
+      ontbyt    = coalesce((p_data->>'ontbyt')::boolean,false),
+      dieet     = coalesce(p_data->>'dieet',''),
+      liedjies  = coalesce(p_data->'liedjies','[]'::jsonb),
+      boodskap  = coalesce(p_data->>'boodskap',''),
+      ekstra    = coalesce(p_data->'ekstra','{}'::jsonb)
+    where id = v_id;
+  else
+    insert into public.rsvps
+      (client_id, lead_naam, epos, gaste, aantal, kom, slaap, naweek, ontbyt, dieet, liedjies, boodskap, ekstra)
+    values (
+      p_client_id,
+      coalesce(p_data->>'lead_naam',''), coalesce(p_data->>'epos',''), coalesce(p_data->'gaste','[]'::jsonb),
+      coalesce((p_data->>'aantal')::int,0), coalesce((p_data->>'kom')::boolean,true),
+      coalesce((p_data->>'slaap')::boolean,false), coalesce(p_data->>'naweek',''),
+      coalesce((p_data->>'ontbyt')::boolean,false), coalesce(p_data->>'dieet',''),
+      coalesce(p_data->'liedjies','[]'::jsonb), coalesce(p_data->>'boodskap',''),
+      coalesce(p_data->'ekstra','{}'::jsonb)
+    );
+  end if;
 end;
 $func$;
 grant execute on function public.save_rsvp(uuid, jsonb) to anon, authenticated;

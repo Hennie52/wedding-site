@@ -150,7 +150,7 @@ window.CONTENT_SCHEMA = [
   { key:"rsvp_allow_edit", label:"Laat gaste toe om hul RSVP te wysig? (ja/nee)", type:"text", group:"RSVP", default:"ja",
     help:"Tik 'ja' of 'nee'. 'nee' versteek die \"Wysig my antwoord\"-knoppie ná 'n gas gestuur het." },
   { key:"rsvp_wysig", label:"RSVP — \"wysig antwoord\"-knoppie", type:"text", group:"RSVP", default:"Wysig my antwoord" },
-  { key:"rsvp_nee_naam_label", label:"RSVP — naam-etiket (as jy nie kom nie)", type:"text", group:"RSVP", default:"Naam & van" },
+  { key:"rsvp_nee_naam_label", label:"RSVP — naam-etiket (as jy nie kom nie)", type:"text", group:"RSVP", default:"Naam en Van" },
   { key:"rsvp_nee_label", label:"RSVP — boodskap-etiket (as jy nie kom nie)", type:"text", group:"RSVP", default:"Boodskap aan ons (opsioneel)" },
   { key:"rsvp_liedjies_hint", label:"RSVP — liedjies-wenk", type:"text", group:"RSVP", default:"Tik die naam, of plak gerus 'n Spotify/YouTube-skakel." },
   { key:"rsvp_dankie_ja_h", label:"RSVP — dankie-opskrif (kom wel)", type:"text", group:"RSVP", default:"Baie dankie!" },
