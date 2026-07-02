@@ -682,6 +682,13 @@
     sectionButton("vrae-list", "✎ Wysig Vrae & antwoorde", function () { blockEditor("vrae", BLOCKS.vrae); });
     sectionButton("bank", "✎ Wysig Bankbesonderhede", function () { blockEditor("bank", BLOCKS.bank); });
     sectionButton("tema-swatches", "✎ Wysig Tema-kleure", function () { blockEditor("tema_swatches", BLOCKS.tema_swatches); });
+    sectionButton("tema-two", "⟷ Wissel tema-foto (links / regs)", function () {
+      var cur = String(P.content.tema_align == null ? "right" : P.content.tema_align).toLowerCase();
+      var next = (cur === "left" || cur === "links") ? "right" : "left";
+      saveContent("tema_align", next)
+        .then(function () { safeReapply(); toast("Tema-foto nou " + (next === "left" ? "links" : "regs") + " ✓"); })
+        .catch(function (e) { console.error(e); toast("Kon nie stoor nie"); });
+    });
     sectionButton("gal", "⚙ Bestuur galery-foto's", openGallery);
 
     // RSVP: wys al die versteekte afdelings sodat die admin elke vraag/knoppie kan wysig

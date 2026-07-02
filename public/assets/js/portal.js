@@ -90,6 +90,7 @@
     renderVrae();
     renderBank();
     renderTemaSwatches();
+    applyTemaAlign();
     renderRsvpExtra();
     // Verblyf-ligging: sit die Google Maps-skakel op die knoppie; leeg = versteek die blok
     const vmapBox = $("#verblyf-map"), vmapA = $("#verblyf-map-a");
@@ -249,6 +250,18 @@
       row.appendChild(k); row.appendChild(v);
       box.appendChild(row);
     });
+  }
+
+  // Tema-foto links of regs (soos die Ons storie-blokke). content.tema_align = "left"/"links" of "right"/"regs".
+  function applyTemaAlign() {
+    const two = $("#tema-two"), img = $("#tema-img");
+    if (!two || !img) return;
+    const txt = $(".tema-txt", two);
+    const a = String(content.tema_align == null ? "right" : content.tema_align).trim().toLowerCase();
+    const left = (a === "left" || a === "links");
+    img.classList.toggle("two__img--l", left);
+    img.classList.toggle("two__img--r", !left);
+    if (txt) { if (left) two.insertBefore(img, txt); else two.insertBefore(txt, img); }
   }
 
   function renderTemaSwatches() {

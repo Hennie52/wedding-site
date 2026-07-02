@@ -99,6 +99,8 @@ window.CONTENT_SCHEMA = [
   { key:"tema_drag", label:"Tema — dragkode-reël", type:"textarea", group:"Tema & drag",
     default:"Semi-formeel / “garden formal”. Vermy wit. Dames: gemaklike hakke vir gras." },
   { key:"img_tema", label:"Tema — foto", type:"image", group:"Tema & drag", default:"", fallback:"assets/foto/familie.jpg" },
+  { key:"tema_align", label:"Tema — foto se kant (links/regs)", type:"text", group:"Tema & drag", default:"right",
+    help:"Tik 'links' of 'regs' — of gebruik die ⟷-knoppie in Redigeer teks." },
   { key:"tema_swatches", label:"Tema — kleure", type:"blocks", group:"Tema & drag",
     default: JSON.stringify([
       { label:"Room", color:"#F2ECDD" },
