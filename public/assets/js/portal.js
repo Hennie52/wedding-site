@@ -533,6 +533,8 @@
     // plekhouers vir die vrye-teks-velde uit inhoud
     const eposEl = $("#epos");
     if (eposEl) eposEl.placeholder = ctext("rsvp_ph_epos", "naam@voorbeeld.co.za");
+    const naamNeeEl = $("#naam-nee");
+    if (naamNeeEl) naamNeeEl.placeholder = ctext("rsvp_ph_naam", "Naam & van");
     const dieetEl = $("#dieet");
     if (dieetEl) dieetEl.placeholder = ctext("rsvp_ph_dieet", "Bv. glutenvry, vegetaries, neut-allergie…");
     const liedPh = ctext("rsvp_ph_lied", "Naam of skakel");
@@ -620,8 +622,10 @@
         ekstra: ekstra,
       };
     } else {
+      const naamNee = ($("#naam-nee").value || "").trim();
+      if (!naamNee) { showErr("Laat weet ons asseblief wie jy is — vul jou naam en van in."); return; }
       record = {
-        lead_naam: "Kan nie kom", epos: "", gaste: [], aantal: 0, kom: false,
+        lead_naam: naamNee, epos: "", gaste: [], aantal: 0, kom: false,
         slaap: false, naweek: "", ontbyt: false, dieet: "",
         liedjies: [], boodskap: $("#boodskap-nee").value.trim(), ekstra: {},
       };
