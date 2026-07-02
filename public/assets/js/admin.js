@@ -192,6 +192,7 @@
     buildTabs();
     buildContentForms();
     wireGuestUI();
+    wireSongsUI();
     wireBudgetUI();
     wireModal();
     selectTab("oorsig");
@@ -256,6 +257,7 @@
     return {
       id: r.id,
       lead_naam: r.lead_naam || "",
+      epos: r.epos || "",
       gaste: Array.isArray(r.gaste) ? r.gaste : safeArr(r.gaste),
       aantal: r.aantal || 0,
       kom: !!r.kom,
@@ -265,13 +267,29 @@
       dieet: r.dieet || "",
       liedjies: Array.isArray(r.liedjies) ? r.liedjies : safeArr(r.liedjies),
       boodskap: r.boodskap || "",
-      ekstra: r.ekstra || {},
+      ekstra: safeObj(r.ekstra),
       created_at: r.created_at || null
     };
   }
   function safeArr(v) {
     if (Array.isArray(v)) return v;
     try { var p = JSON.parse(v); return Array.isArray(p) ? p : []; } catch (e) { return []; }
+  }
+  function safeObj(v) {
+    if (v && typeof v === "object" && !Array.isArray(v)) return v;
+    try { var p = JSON.parse(v); return (p && typeof p === "object" && !Array.isArray(p)) ? p : {}; } catch (e) { return {}; }
+  }
+  // Kopieer teks na die knipbord (met terugval vir ouer blaaiers)
+  function copyText(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t);
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy") ? resolve() : reject(new Error("copy")); }
+      catch (e) { reject(e); }
+      finally { ta.remove(); }
+    });
   }
 
   /* ── Oorsig ─────────────────────────────────────────────────────── */
@@ -378,9 +396,11 @@
     });
     var filters = $("guest-filters");
     filters.textContent = "";
-    [["almal", "Almal"], ["kom", "Kom"], ["nie", "Kom nie"]].forEach(function (f) {
+    [["almal", "Almal"], ["kom", "Kom"], ["nie", "Kom nie"],
+     ["slaap", "Slaap oor"], ["ontbyt", "Ontbyt"]].forEach(function (f) {
       var b = el("button", "filter-chip", f[1]);
       b.dataset.filter = f[0];
+      b.dataset.label = f[1];
       b.addEventListener("click", function () {
         guestFilter = f[0]; syncFilterChips(); renderGuests();
       });
@@ -389,6 +409,31 @@
     syncFilterChips();
     var csv = $("csv-btn");
     if (csv) csv.addEventListener("click", exportCsv);
+    // Kopieer al die e-posadresse (uniek, net dié wat een gegee het) — vir uitnodigings/opdaterings
+    var eb = $("email-btn");
+    if (eb) eb.addEventListener("click", function () {
+      var emails = [];
+      rsvps.forEach(function (r) {
+        var e = (r.epos || "").trim();
+        if (e && emails.indexOf(e) === -1) emails.push(e);
+      });
+      if (!emails.length) { toast("Nog geen e-posadresse nie"); return; }
+      copyText(emails.join("; "))
+        .then(function () { toast(emails.length + " e-pos(se) gekopieer ✓"); })
+        .catch(function () { toast("Kon nie kopieer nie"); });
+    });
+  }
+  // Wys tellings op die filter-chips, bv. "Kom (12)"
+  function updateChipCounts() {
+    var c = { almal: rsvps.length, kom: 0, nie: 0, slaap: 0, ontbyt: 0 };
+    rsvps.forEach(function (r) {
+      if (r.kom) { c.kom++; if (r.slaap) c.slaap++; if (r.ontbyt) c.ontbyt++; }
+      else c.nie++;
+    });
+    document.querySelectorAll("#guest-filters .filter-chip").forEach(function (b) {
+      var n = c[b.dataset.filter];
+      b.textContent = b.dataset.label + (n != null ? " (" + n + ")" : "");
+    });
   }
   function syncFilterChips() {
     document.querySelectorAll("#guest-filters .filter-chip").forEach(function (b) {
@@ -399,9 +444,11 @@
   function filteredGuests() {
     return rsvps.filter(function (r) {
       var st = statusVan(r);
-      if (guestFilter !== "almal" && st !== guestFilter) return false;
+      if (guestFilter === "slaap") { if (!(r.kom && r.slaap)) return false; }
+      else if (guestFilter === "ontbyt") { if (!(r.kom && r.ontbyt)) return false; }
+      else if (guestFilter !== "almal" && st !== guestFilter) return false;
       if (guestSearch) {
-        var hay = (r.lead_naam + " " + (r.gaste || []).join(" ")).toLowerCase();
+        var hay = (r.lead_naam + " " + (r.gaste || []).join(" ") + " " + (r.epos || "")).toLowerCase();
         if (hay.indexOf(guestSearch) === -1) return false;
       }
       return true;
@@ -409,6 +456,7 @@
   }
 
   function renderGuests() {
+    updateChipCounts();
     var tb = $("guest-rows");
     tb.textContent = "";
     var list = filteredGuests();
@@ -441,6 +489,8 @@
 
       tr.appendChild(el("td", "cell-dim", r.dieet || "—"));
 
+      tr.appendChild(el("td", "cell-dim", r.epos || "—"));
+
       tr.appendChild(el("td", "cell-arrow", "›"));
 
       tr.addEventListener("click", function () { openDetail(r); });
@@ -449,17 +499,24 @@
   }
 
   function exportCsv() {
-    var head = ["Datum", "Naam", "Status", "Aantal", "Gaste", "Slaap", "Naweek",
-                "Ontbyt", "Dieet", "Liedjies", "Boodskap"];
+    // Eie/bygevoegde RSVP-vrae word ook kolomme (alle unieke vrae oor alle antwoorde)
+    var extraKeys = [];
+    rsvps.forEach(function (r) {
+      Object.keys(r.ekstra || {}).forEach(function (k) {
+        if (extraKeys.indexOf(k) === -1) extraKeys.push(k);
+      });
+    });
+    var head = ["Datum", "Naam", "E-pos", "Status", "Aantal", "Gaste", "Slaap", "Naweek",
+                "Ontbyt", "Dieet", "Liedjies", "Boodskap"].concat(extraKeys);
     var rows = rsvps.map(function (r) {
       var st = r.kom ? "Kom" : "Kom nie";
       var datum = r.created_at ? new Date(r.created_at).toLocaleDateString("af-ZA") : "";
       return [
-        datum, r.lead_naam, st, r.aantal || 0, (r.gaste || []).join("; "),
+        datum, r.lead_naam, r.epos || "", st, r.aantal || 0, (r.gaste || []).join("; "),
         r.slaap ? "Ja" : "Nee", r.naweek || "", r.ontbyt ? "Ja" : "Nee",
         r.dieet || "", (r.liedjies || []).filter(Boolean).join("; "),
         (r.boodskap || "").replace(/\n/g, " ")
-      ];
+      ].concat(extraKeys.map(function (k) { return (r.ekstra || {})[k] || ""; }));
     });
     var csv = [head].concat(rows).map(function (row) {
       return row.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(",");
@@ -474,6 +531,22 @@
   }
 
   /* ── Liedjies ───────────────────────────────────────────────────── */
+  function wireSongsUI() {
+    var b = $("songs-copy");
+    if (!b) return;
+    b.addEventListener("click", function () {
+      var lines = [];
+      rsvps.forEach(function (r) {
+        (r.liedjies || []).filter(Boolean).forEach(function (s) {
+          lines.push(String(lines.length + 1).padStart(2, "0") + ". " + String(s).trim() + "  — versoek deur " + (r.lead_naam || "Gas"));
+        });
+      });
+      if (!lines.length) { toast("Nog geen liedjieversoeke nie"); return; }
+      copyText(lines.join("\n"))
+        .then(function () { toast(lines.length + " liedjies gekopieer ✓"); })
+        .catch(function () { toast("Kon nie kopieer nie"); });
+    });
+  }
   function renderSongs() {
     var list = [];
     rsvps.forEach(function (r) {
@@ -1325,6 +1398,15 @@
     // rye
     var rowsBox = $("d-rows");
     rowsBox.textContent = "";
+    // e-pos as klikbare skakel (net wanneer ons dit het)
+    if (r.epos) {
+      var eRow = el("div", "modal-kv");
+      eRow.appendChild(el("span", "k", "E-pos"));
+      var eLink = el("a", "v", r.epos);
+      eLink.href = "mailto:" + r.epos;
+      eRow.appendChild(eLink);
+      rowsBox.appendChild(eRow);
+    }
     var kv = [];
     if (r.kom) {
       kv.push(["Aantal gaste", String(r.aantal || 0)]);

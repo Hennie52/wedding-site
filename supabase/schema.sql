@@ -17,6 +17,7 @@ create table if not exists public.content (
 create table if not exists public.rsvps (
   id          bigint generated always as identity primary key,
   lead_naam   text not null,            -- die persoon wat invul / eerste gas
+  epos        text default '',          -- e-posadres (verpligtend op die werf wanneer hulle kom)
   gaste       jsonb not null default '[]'::jsonb,  -- ["Naam 1","Naam 2",...]
   aantal      integer not null default 0,
   kom         boolean not null default true,
@@ -31,6 +32,7 @@ create table if not exists public.rsvps (
 );
 -- Maak seker die kolom bestaan ook op ouer tabelle (veilig om weer te hardloop):
 alter table public.rsvps add column if not exists ekstra jsonb not null default '{}'::jsonb;
+alter table public.rsvps add column if not exists epos text default '';
 -- client_id: een ry per toestel, sodat 'n gas se RSVP-wysiging dieselfde ry opdateer (geen duplikate).
 alter table public.rsvps add column if not exists client_id uuid;
 create unique index if not exists rsvps_client_id_key on public.rsvps (client_id);
@@ -41,10 +43,10 @@ create or replace function public.save_rsvp(p_client_id uuid, p_data jsonb)
 returns void language plpgsql security definer set search_path = public as $func$
 begin
   insert into public.rsvps
-    (client_id, lead_naam, gaste, aantal, kom, slaap, naweek, ontbyt, dieet, liedjies, boodskap, ekstra)
+    (client_id, lead_naam, epos, gaste, aantal, kom, slaap, naweek, ontbyt, dieet, liedjies, boodskap, ekstra)
   values (
     p_client_id,
-    coalesce(p_data->>'lead_naam',''), coalesce(p_data->'gaste','[]'::jsonb),
+    coalesce(p_data->>'lead_naam',''), coalesce(p_data->>'epos',''), coalesce(p_data->'gaste','[]'::jsonb),
     coalesce((p_data->>'aantal')::int,0), coalesce((p_data->>'kom')::boolean,true),
     coalesce((p_data->>'slaap')::boolean,false), coalesce(p_data->>'naweek',''),
     coalesce((p_data->>'ontbyt')::boolean,false), coalesce(p_data->>'dieet',''),
@@ -52,7 +54,7 @@ begin
     coalesce(p_data->'ekstra','{}'::jsonb)
   )
   on conflict (client_id) do update set
-    lead_naam=excluded.lead_naam, gaste=excluded.gaste, aantal=excluded.aantal,
+    lead_naam=excluded.lead_naam, epos=excluded.epos, gaste=excluded.gaste, aantal=excluded.aantal,
     kom=excluded.kom, slaap=excluded.slaap, naweek=excluded.naweek, ontbyt=excluded.ontbyt,
     dieet=excluded.dieet, liedjies=excluded.liedjies, boodskap=excluded.boodskap, ekstra=excluded.ekstra;
 end;

@@ -47,7 +47,10 @@
   <nav class="nav">
     <div class="nav__in">
       <button class="nav__brand" data-scroll="tuis"><span data-content="nav_brand">H &amp; J</span></button>
-      <div class="nav__links">
+      <button class="nav__toggle" type="button" aria-label="Kieslys" aria-expanded="false" aria-controls="nav-links">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav__links" id="nav-links">
         <button class="nav__link" data-scroll="storie" data-content="nav_storie">Ons Storie</button>
         <button class="nav__link" data-scroll="program" data-content="nav_program">Program</button>
         <button class="nav__link" data-scroll="galery" data-content="nav_galery">Galery</button>
@@ -148,6 +151,20 @@
       </div>
       <div class="cards" id="verblyf-cards" data-reveal></div>
       <p class="vnote" data-content="verblyf_note" data-reveal></p>
+      <!-- Ligging / kaart -->
+      <div class="vmap" id="verblyf-map" data-reveal>
+        <span class="vmap__pin" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </span>
+        <div class="vmap__txt">
+          <p class="vmap__kicker" data-content="verblyf_plek_kicker">Die ligging</p>
+          <h3 data-content="verblyf_plek_naam">Kuthaba Bush Lodge</h3>
+          <p class="vmap__sub" data-content="verblyf_plek_info">Alles gebeur hier — die seremonie, onthaal en verblyf. Kry maklik aanwysings met die kaart.</p>
+        </div>
+        <a id="verblyf-map-a" class="vmap__btn" target="_blank" rel="noopener noreferrer">
+          <span data-content="verblyf_map_btn">Maak oop in Google Maps</span>&nbsp;↗
+        </a>
+      </div>
     </div>
   </section>
 
@@ -224,11 +241,15 @@
           <!-- KOM JA -->
           <div id="rsvp-ja" class="hidden" style="margin-top:34px;display:flex;flex-direction:column;gap:30px">
             <div>
-              <div class="rrow"><span class="rnum">01</span><span class="rq" style="margin:0"><span data-content="rsvp_q_wie">Wie kom alles?</span> <span id="seats-hint" style="color:var(--muted3)"></span></span></div>
+              <div class="rrow"><span class="rnum">01</span><span class="rq" style="margin:0"><span data-content="rsvp_q_wie">Wie kom alles?</span></span></div>
               <div id="gaste-velde" style="display:flex;flex-direction:column;gap:11px"></div>
             </div>
             <div class="rgrp">
-              <div class="rrow"><span class="rnum">02</span><span class="rq" style="margin:0" data-content="rsvp_q_slaap">Slaap jy/julle oor?</span></div>
+              <div class="rrow"><span class="rnum">02</span><span class="rq" style="margin:0" data-content="rsvp_q_epos">Jou e-posadres</span></div>
+              <input class="rin" id="epos" type="email" inputmode="email" autocomplete="email" placeholder="naam@voorbeeld.co.za">
+            </div>
+            <div class="rgrp">
+              <div class="rrow"><span class="rnum">03</span><span class="rq" style="margin:0" data-content="rsvp_q_slaap">Slaap jy/julle oor?</span></div>
               <div class="choices" data-group="slaap">
                 <button type="button" class="choice" data-slaap="ja"><span data-content="rsvp_btn_slaap_ja">Ja</span></button>
                 <button type="button" class="choice" data-slaap="nee"><span data-content="rsvp_btn_slaap_nee">Nee</span></button>
@@ -242,18 +263,18 @@
               </div>
             </div>
             <div class="rgrp">
-              <div class="rrow"><span class="rnum">03</span><span class="rq" style="margin:0" data-content="rsvp_q_ontbyt">Sondag-ontbytbuffet?</span></div>
+              <div class="rrow"><span class="rnum">04</span><span class="rq" style="margin:0" data-content="rsvp_q_ontbyt">Sondag-ontbytbuffet?</span></div>
               <div class="choices" data-group="ontbyt">
                 <button type="button" class="choice" data-ontbyt="ja"><span data-content="rsvp_btn_ontbyt_ja">Ja, graag</span></button>
                 <button type="button" class="choice" data-ontbyt="nee"><span data-content="rsvp_btn_ontbyt_nee">Nee dankie</span></button>
               </div>
             </div>
             <div class="rgrp">
-              <div class="rrow"><span class="rnum">04</span><span class="rq" style="margin:0" data-content="rsvp_q_dieet">Dieetbehoeftes of allergieë</span></div>
+              <div class="rrow"><span class="rnum">05</span><span class="rq" style="margin:0" data-content="rsvp_q_dieet">Dieetbehoeftes of allergieë</span></div>
               <textarea class="rin" id="dieet" placeholder="Bv. glutenvry, vegetaries, neut-allergie…"></textarea>
             </div>
             <div class="rgrp">
-              <div class="rrow" style="margin-bottom:6px"><span class="rnum">05</span><span class="rq" style="margin:0" data-content="rsvp_q_liedjies">Versoek 3 liedjies vir die dansvloer</span></div>
+              <div class="rrow" style="margin-bottom:6px"><span class="rnum">06</span><span class="rq" style="margin:0" data-content="rsvp_q_liedjies">Versoek 3 liedjies vir die dansvloer</span></div>
               <p class="prose" style="font-style:italic;font-size:16px;color:var(--muted3);margin:0 0 16px 32px" data-content="rsvp_liedjies_hint">Tik die naam, of plak gerus 'n Spotify/YouTube-skakel.</p>
               <div class="rsvp-songs">
                 <div class="rsvp-song"><b>1</b><input class="rin" id="lied0" placeholder="Naam of skakel"></div>
@@ -264,7 +285,7 @@
             <!-- Eie vrae (deur die admin bygevoeg) -->
             <div id="rsvp-extra-q"></div>
             <div class="rgrp">
-              <div class="rrow"><span class="rnum">06</span><span class="rq" style="margin:0" data-content="rsvp_q_boodskap">'n Boodskap aan Hennie &amp; Jolinda</span></div>
+              <div class="rrow"><span class="rnum">07</span><span class="rq" style="margin:0" data-content="rsvp_q_boodskap">'n Boodskap aan Hennie &amp; Jolinda</span></div>
               <textarea class="rin" id="boodskap-ja" placeholder="Deel 'n wens, 'n grappie of net liefde…"></textarea>
             </div>
           </div>

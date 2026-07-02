@@ -42,6 +42,13 @@
     renderBank();
     renderTemaSwatches();
     renderRsvpExtra();
+    // Verblyf-ligging: sit die Google Maps-skakel op die knoppie; leeg = versteek die blok
+    const vmapBox = $("#verblyf-map"), vmapA = $("#verblyf-map-a");
+    if (vmapBox && vmapA) {
+      const mapUrl = String(content.verblyf_map_url == null ? "" : content.verblyf_map_url).trim();
+      if (/^https?:\/\//i.test(mapUrl)) { vmapA.href = mapUrl; vmapBox.style.display = ""; }
+      else vmapBox.style.display = "none";
+    }
     startCountdown(content.datum_iso);
   }
 
@@ -346,14 +353,68 @@
   /* ---- navigasie + reveal ---- */
   function setupNav() {
     const nav = $(".nav");
-    $$("[data-scroll]").forEach((b) => b.addEventListener("click", () => {
-      const el = document.getElementById(b.getAttribute("data-scroll"));
+    const toggle = $(".nav__toggle");
+    function closeMenu() {
+      if (nav) nav.classList.remove("open");
+      if (toggle) toggle.setAttribute("aria-expanded", "false");
+    }
+
+    // Robuuste "gladde sprong" na 'n afdeling.
+    // Lui-gelaaide foto's en lettertipes kan die bladsy-hoogte NÁ die eerste sprong laat groei,
+    // wat gemaak het dat 'n mens die skakel twee keer moes klik. Ons herbereken die teiken 'n
+    // paar keer sodat die eerste klik reg land — en staak sodra die gas self begin scroll.
+    let scrollToken = 0;
+    function scrollToId(id) {
+      const el = document.getElementById(id);
       if (!el) return;
-      // gebruik die werklike kop-hoogte sodat die afdeling nie agter die kieslys wegkruip nie
-      const offset = (nav ? nav.offsetHeight : 70) + 12;
-      const y = el.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top: y, behavior: "smooth" });
+      const token = ++scrollToken;
+      // gebruik die werklike kop-hoogte sodat die afdeling nie agter die kieslys wegkruip nie,
+      // en beperk tot die bereikbare bereik (RSVP is die laaste afdeling).
+      const targetY = function () {
+        const offset = (nav ? nav.offsetHeight : 70) + 12;
+        const raw = el.getBoundingClientRect().top + window.scrollY - offset;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        return Math.max(0, Math.min(raw, max));
+      };
+      let cancelled = false;
+      const stop = function () { cancelled = true; };
+      window.addEventListener("wheel", stop, { passive: true });
+      window.addEventListener("touchmove", stop, { passive: true });
+      function cleanup() {
+        window.removeEventListener("wheel", stop);
+        window.removeEventListener("touchmove", stop);
+      }
+      window.scrollTo({ top: targetY(), behavior: "smooth" });
+      let passes = 0;
+      (function settle() {
+        if (cancelled || token !== scrollToken || passes++ >= 6) { cleanup(); return; }
+        setTimeout(function () {
+          if (cancelled || token !== scrollToken) { cleanup(); return; }
+          const want = targetY();
+          if (Math.abs(want - window.scrollY) > 2) window.scrollTo({ top: want, behavior: "smooth" });
+          settle();
+        }, 220);
+      })();
+    }
+
+    $$("[data-scroll]").forEach((b) => b.addEventListener("click", () => {
+      closeMenu(); // maak die hamburger-kieslys toe wanneer 'n skakel geklik word
+      scrollToId(b.getAttribute("data-scroll"));
     }));
+    // Hamburger oop/toe (tablet & mobiel)
+    if (toggle && nav) {
+      toggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const open = nav.classList.toggle("open");
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      // klik buite die kieslys maak dit toe
+      document.addEventListener("click", (e) => {
+        if (nav.classList.contains("open") && !nav.contains(e.target)) closeMenu();
+      });
+      // Escape maak dit toe
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+    }
     const logout = $("#gate-logout");
     if (logout) logout.addEventListener("click", () => {
       try { localStorage.removeItem(GATE_KEY); } catch (e) {}
@@ -405,10 +466,10 @@
     });
     if (max <= 1) addGasBtn.style.display = "none";
     gv.parentNode.appendChild(addGasBtn);
-    const seatsHint = $("#seats-hint");
-    if (seatsHint) seatsHint.textContent = max > 1 ? "(tot " + max + " gaste)" : "";
 
     // plekhouers vir die vrye-teks-velde uit inhoud
+    const eposEl = $("#epos");
+    if (eposEl) eposEl.placeholder = ctext("rsvp_ph_epos", "naam@voorbeeld.co.za");
     const dieetEl = $("#dieet");
     if (dieetEl) dieetEl.placeholder = ctext("rsvp_ph_dieet", "Bv. glutenvry, vegetaries, neut-allergie…");
     const liedPh = ctext("rsvp_ph_lied", "Naam of skakel");
@@ -467,6 +528,8 @@
   }
   function clearErr() { const e = $("#rsvp-err"); if (e) e.classList.add("hidden"); }
   function showErr(msg) { const e = $("#rsvp-err"); e.textContent = msg; e.classList.remove("hidden"); }
+  // Eenvoudige e-pos-toets: iets@iets.iets (geen spasies)
+  function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || "").trim()); }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -477,13 +540,16 @@
     if (rsvp.kom) {
       const gaste = $$("[data-gas]", form).map((i) => i.value.trim()).filter(Boolean);
       if (!gaste.length) { showErr("Voeg asseblief ten minste een naam by."); return; }
+      const epos = ($("#epos").value || "").trim();
+      if (!epos) { showErr("Vul asseblief jou e-posadres in sodat ons jou kan bereik."); return; }
+      if (!isEmail(epos)) { showErr("Daardie e-posadres lyk nie heeltemal reg nie — kyk asseblief weer."); return; }
       if (rsvp.slaap === null) { showErr("Laat ons weet of jy/julle oorslaap."); return; }
       if (rsvp.slaap && !rsvp.naweek) { showErr("Kies die hele naweek of net Saterdag."); return; }
       if (rsvp.ontbyt === null) { showErr("Laat weet asseblief oor die Sondag-ontbyt."); return; }
       const ekstra = {};
       $$("#rsvp-extra-q [data-extra]").forEach((i) => { const k = i.getAttribute("data-extra"); if (k) ekstra[k] = i.value.trim(); });
       record = {
-        lead_naam: gaste[0], gaste, aantal: gaste.length, kom: true,
+        lead_naam: gaste[0], epos: epos, gaste, aantal: gaste.length, kom: true,
         slaap: !!rsvp.slaap, naweek: rsvp.naweek, ontbyt: !!rsvp.ontbyt,
         dieet: $("#dieet").value.trim(),
         liedjies: [$("#lied0").value.trim(), $("#lied1").value.trim(), $("#lied2").value.trim()],
@@ -492,7 +558,7 @@
       };
     } else {
       record = {
-        lead_naam: "Kan nie kom", gaste: [], aantal: 0, kom: false,
+        lead_naam: "Kan nie kom", epos: "", gaste: [], aantal: 0, kom: false,
         slaap: false, naweek: "", ontbyt: false, dieet: "",
         liedjies: [], boodskap: $("#boodskap-nee").value.trim(), ekstra: {},
       };

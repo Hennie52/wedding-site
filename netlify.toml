@@ -1,0 +1,5 @@
+# Netlify-konfigurasie vir die Hennie & Jolinda trouwerf.
+# Dit is 'n statiese werf (geen bou-stap) — alles wat gepubliseer word, sit in "public".
+# Hierdie lêer verseker Netlify wys altyd die regte vouer, ongeag die UI-instellings.
+[build]
+  publish = "public"

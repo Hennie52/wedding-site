@@ -153,7 +153,10 @@
             <h2 class="view-title">Gastelys</h2>
             <p class="view-lead">Klik 'n ry vir die volledige antwoord.</p>
           </div>
-          <button id="csv-btn" class="btn-solid-sm">↓ Voer uit (CSV)</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button id="email-btn" class="btn-ghost">✉ Kopieer e-posse</button>
+            <button id="csv-btn" class="btn-solid-sm">↓ Voer uit (CSV)</button>
+          </div>
         </div>
         <div class="filter-row">
           <input id="guest-search" class="search" type="search" placeholder="Soek naam…">
@@ -164,7 +167,7 @@
             <thead>
               <tr>
                 <th>Genooi</th><th>Status</th><th>Gaste</th>
-                <th>Slaap</th><th>Ontbyt</th><th>Dieet</th><th></th>
+                <th>Slaap</th><th>Ontbyt</th><th>Dieet</th><th>E-pos</th><th></th>
               </tr>
             </thead>
             <tbody id="guest-rows"></tbody>
@@ -175,9 +178,14 @@
 
       <!-- ════ LIEDJIES ════ -->
       <section class="view" data-view="liedjies" hidden>
-        <span class="eyebrow">✦ Musiek</span>
-        <h2 class="view-title">Liedjieversoeke</h2>
-        <p class="view-lead">Alles wat gaste vra vir die dansvloer. Skakels open in 'n nuwe venster.</p>
+        <div class="view-head-row">
+          <div>
+            <span class="eyebrow">✦ Musiek</span>
+            <h2 class="view-title">Liedjieversoeke</h2>
+            <p class="view-lead">Alles wat gaste vra vir die dansvloer. Skakels open in 'n nuwe venster.</p>
+          </div>
+          <button id="songs-copy" class="btn-solid-sm">⧉ Kopieer lys (vir die DJ)</button>
+        </div>
         <div id="songs-list" class="song-list"></div>
         <p id="songs-empty" class="empty-state hidden">Nog geen liedjieversoeke nie.</p>
       </section>

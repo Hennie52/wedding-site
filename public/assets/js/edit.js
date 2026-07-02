@@ -610,6 +610,12 @@
     sectionButton("prog-sat", "✎ Wysig Program — Saterdag", function () { blockEditor("program_sat", BLOCKS.program_sat); });
     sectionButton("prog-son", "✎ Wysig Program — Sondag", function () { blockEditor("program_son", BLOCKS.program_son); });
     sectionButton("verblyf-cards", "✎ Wysig Verblyf-opsies", function () { blockEditor("verblyf", BLOCKS.verblyf); });
+    // Die Maps-skakel is 'n href (nie sigbare teks nie) — kry sy eie wysig-knoppie
+    sectionButton("verblyf-map", "✎ Wysig Google Maps-skakel", function () {
+      var sf = schemaField("verblyf_map_url");
+      editKey("verblyf_map_url", "Google Maps-skakel",
+        (sf && sf.help) || "Plak enige Google Maps \"deel\"-skakel. Los leeg om die ligging-blok weg te steek.");
+    });
     sectionButton("vrae-list", "✎ Wysig Vrae & antwoorde", function () { blockEditor("vrae", BLOCKS.vrae); });
     sectionButton("bank", "✎ Wysig Bankbesonderhede", function () { blockEditor("bank", BLOCKS.bank); });
     sectionButton("tema-swatches", "✎ Wysig Tema-kleure", function () { blockEditor("tema_swatches", BLOCKS.tema_swatches); });

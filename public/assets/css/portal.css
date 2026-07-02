@@ -75,6 +75,11 @@ button{font-family:inherit}
 .nav__link:hover::after{width:100%}
 .nav__rsvp{background:var(--olive);border:0;cursor:pointer;font-family:var(--sans);font-size:11px;font-weight:500;
   letter-spacing:2px;text-transform:uppercase;color:var(--cream);padding:10px 18px;border-radius:2px;white-space:nowrap}
+/* Hamburger-knoppie — versteek op groot skerms, wys op tablet/mobiel (sien media-navraag onder) */
+.nav__toggle{display:none;flex-direction:column;justify-content:center;gap:5px;width:44px;height:40px;
+  background:none;border:0;cursor:pointer;padding:9px 8px}
+.nav__toggle span{display:block;height:2px;width:100%;background:var(--olive);border-radius:2px;
+  transition:transform .3s ease,opacity .2s ease}
 
 /* ════════ algemene afdeling-elemente ════════ */
 .wrap{max-width:1180px;margin:0 auto;padding:0 26px}
@@ -203,6 +208,27 @@ button{font-family:inherit}
 .vcard .far{font-family:var(--sans);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted3)}
 .vcard p{font-family:var(--serif);font-size:17px;font-weight:300;line-height:1.65;color:#6b7257;margin:14px 0 0}
 .vnote{text-align:center;font-family:var(--serif);font-style:italic;font-size:19px;color:var(--muted4);margin:34px auto 0;max-width:560px}
+/* Ligging-kaart onderaan Verblyf */
+.vmap{margin-top:38px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  background:var(--card);border:1px solid var(--line2);border-top:2px solid var(--gold);
+  border-radius:4px;padding:26px 30px;box-shadow:0 24px 50px -32px rgba(52,64,42,.45)}
+.vmap__pin{flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  width:52px;height:52px;border-radius:50%;color:var(--olive);
+  background:var(--cream2);border:1px solid var(--gold2)}
+.vmap__txt{flex:1;min-width:220px}
+.vmap__kicker{margin:0 0 3px;font-family:var(--sans);font-size:10px;font-weight:500;
+  letter-spacing:2.5px;text-transform:uppercase;color:var(--muted3)}
+.vmap__txt h3{margin:0 0 5px;font-family:var(--serif);font-weight:500;font-size:26px;color:var(--ink)}
+.vmap__sub{margin:0;font-family:var(--serif);font-size:16.5px;font-weight:300;line-height:1.55;color:#6b7257}
+.vmap__btn{flex:0 0 auto;display:inline-flex;align-items:center;background:var(--olive);color:var(--cream);
+  text-decoration:none;font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:2px;
+  text-transform:uppercase;padding:14px 22px;border-radius:2px;white-space:nowrap;
+  transition:background .3s,transform .3s}
+.vmap__btn:hover{background:var(--sage3);transform:translateY(-2px)}
+@media (max-width:640px){
+  .vmap{flex-direction:column;text-align:center;padding:28px 22px;gap:14px}
+  .vmap__btn{width:100%;justify-content:center}
+}
 
 /* ── tema ── */
 .swatches{display:flex;gap:18px;margin-top:32px;flex-wrap:wrap}
@@ -305,6 +331,53 @@ textarea.rin:focus{border-color:var(--sage)}
   .bankbox{padding:26px 24px}
   .bankrow{gap:18px}
   .nav__in{padding:12px 18px}
+}
+
+/* ════════ Hamburger-kieslys (tablet & mobiel) ════════ */
+@media (max-width:860px){
+  .nav__in{position:relative}
+  .nav__toggle{display:flex}
+  .nav__links{
+    position:absolute;top:calc(100% + 1px);left:0;right:0;
+    flex-direction:column;align-items:stretch;gap:0;
+    background:var(--cream);border-bottom:1px solid var(--line2);
+    padding:6px 20px 18px;box-shadow:0 26px 40px -26px rgba(52,64,42,.55);
+    max-height:calc(100vh - 62px);overflow-y:auto;overflow-x:hidden;
+    /* toe (versteek) toestand */
+    opacity:0;visibility:hidden;transform:translateY(-8px);
+    transition:opacity .22s ease,transform .22s ease,visibility .22s;
+  }
+  .nav.open .nav__links{opacity:1;visibility:visible;transform:none}
+  .nav__link{width:100%;text-align:left;padding:15px 4px;font-size:12.5px;border-bottom:1px solid var(--line)}
+  .nav__link::after{display:none}
+  .nav__rsvp{width:100%;text-align:center;margin-top:14px;padding:14px}
+  /* hamburger → X wanneer oop */
+  .nav.open .nav__toggle span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .nav.open .nav__toggle span:nth-child(2){opacity:0}
+  .nav.open .nav__toggle span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+}
+
+/* ════════ Galery: horisontale rol-strook op mobiel ════════ */
+/* In plaas van 'n lang vertikale stapel: netjiese kaarte langs mekaar, rol na regs.
+   Elke kaart het dieselfde hoogte; die foto vul dit sonder om te vervorm (tik = volle foto). */
+@media (max-width:640px){
+  .gal{
+    column-count:initial;
+    display:flex;flex-wrap:nowrap;gap:12px;
+    overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    padding:2px 2px 14px;
+    /* netjiese dun rolstaaf */
+    scrollbar-width:thin;scrollbar-color:var(--line2) transparent;
+  }
+  .gal::-webkit-scrollbar{height:6px}
+  .gal::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+  .gal::-webkit-scrollbar-track{background:transparent}
+  .gal__tile{
+    flex:0 0 72%;height:88vw;max-height:440px;
+    margin-bottom:0;scroll-snap-align:center;
+  }
+  .gal__tile img{width:100%;height:100%;object-fit:cover}
 }
 
 /* duideliker fokus vir toeganklikheid (toetsbord-navigasie) */
