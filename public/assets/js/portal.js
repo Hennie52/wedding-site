@@ -27,6 +27,55 @@
     }
   }
 
+  /* ---- Afdeling-volgorde (admin kan afdelings op/af skuif) ----
+     Top-vlak afdelings binne #site wat herrangskik kan word. Die kop (hero) +
+     aftelling bly bo, en die voetskrif bly onder. */
+  const SECTIONS = [
+    { key: "storie", label: "Ons storie" },
+    { key: "program", label: "Program" },
+    { key: "galery", label: "Galery" },
+    { key: "verblyf", label: "Verblyf" },
+    { key: "tema", label: "Tema & drag" },
+    { key: "geskenke", label: "Geskenke" },
+    { key: "vrae", label: "Vrae & antwoorde" },
+    { key: "rsvp", label: "RSVP" },
+  ];
+  // Effektiewe volgorde: gestoorde volgorde (net geldige sleutels), dan enige nuwes agteraan.
+  function sectionOrder() {
+    const def = SECTIONS.map((s) => s.key);
+    let stored = [];
+    try { const p = JSON.parse(content.section_order || "[]"); if (Array.isArray(p)) stored = p; } catch (e) {}
+    const known = {}; def.forEach((k) => { known[k] = true; });
+    const seen = {}, out = [];
+    stored.forEach((k) => { if (known[k] && !seen[k]) { seen[k] = true; out.push(k); } });
+    def.forEach((k) => { if (!seen[k]) { seen[k] = true; out.push(k); } });
+    return out;
+  }
+  // Herrangskik die afdelings — en die kieslys-skakels — volgens die gestoorde volgorde.
+  function applySectionOrder() {
+    const site = $("#site");
+    if (!site) return;
+    const order = sectionOrder();
+    let footer = null;
+    for (let i = 0; i < site.children.length; i++) {
+      if (site.children[i].tagName === "FOOTER") { footer = site.children[i]; break; }
+    }
+    order.forEach((key) => {
+      const el = document.getElementById(key);
+      if (el && el.parentNode === site) site.insertBefore(el, footer);
+    });
+    // kieslys-skakels in dieselfde volgorde (die RSVP-knoppie bly laaste)
+    const navLinks = $("#nav-links");
+    if (navLinks) {
+      const rsvpBtn = navLinks.querySelector(".nav__rsvp");
+      order.forEach((key) => {
+        if (key === "rsvp") return;
+        const link = navLinks.querySelector('[data-scroll="' + key + '"]');
+        if (link) navLinks.insertBefore(link, rsvpBtn || null);
+      });
+    }
+  }
+
   function applyContent() {
     $$("[data-content]").forEach((el) => {
       const k = el.getAttribute("data-content");
@@ -50,6 +99,7 @@
       else vmapBox.style.display = "none";
     }
     startCountdown(content.datum_iso);
+    applySectionOrder();
   }
 
   // Eie RSVP-vrae (deur die admin bygevoeg)
@@ -629,6 +679,8 @@
       reapply: function () { applyContent(); applyImages(); renderGallery(); },
       storieBlocks: storieBlocks,
       items: function (key, props) { return flexItems(content[key], props); },
+      sections: SECTIONS,
+      sectionOrder: sectionOrder,
     };
 
     const editMode = new URLSearchParams(location.search).get("edit") === "1";

@@ -508,6 +508,63 @@
     };
   }
 
+  /* ───────────────────────── 5) AFDELING-VOLGORDE (skuif op/af) ───────────────────────── */
+  function openOrderEditor() {
+    var secs = P.sections || [];
+    if (!secs.length) { toast("Geen afdelings om te skuif nie"); return; }
+    var labelByKey = {};
+    secs.forEach(function (s) { labelByKey[s.key] = s.label; });
+    var order;
+    try { order = (P.sectionOrder && P.sectionOrder()) || secs.map(function (s) { return s.key; }); }
+    catch (e) { order = secs.map(function (s) { return s.key; }); }
+    order = order.filter(function (k) { return labelByKey[k]; });
+
+    var m = modal("Skuif afdelings rond");
+    m.card.appendChild(elc("p", "edit-hint",
+      "Skuif afdelings op of af om hul volgorde op die werf te verander. Die voorblad-kop, aftelling en voetskrif bly bo en onder."));
+    var list = elc("div", "edit-blocks");
+    m.card.appendChild(list);
+    var bar = actions();
+    var cancel = btn("Kanselleer", ""), save = btn("Stoor volgorde", "primary");
+    bar.appendChild(cancel); bar.appendChild(save);
+    m.card.appendChild(bar);
+
+    function move(i, dir) {
+      var j = i + dir;
+      if (j < 0 || j >= order.length) return;
+      var t = order[i]; order[i] = order[j]; order[j] = t;
+      render();
+    }
+    function render() {
+      list.textContent = "";
+      order.forEach(function (key, i) {
+        var row = elc("div", "edit-block");
+        var top = elc("div", "edit-block__top");
+        top.appendChild(elc("span", "edit-block__num", "#" + (i + 1)));
+        var nm = elc("span", null, labelByKey[key] || key);
+        nm.style.cssText = "flex:1;padding:0 12px;font-family:'Cormorant Garamond',serif;font-size:19px;color:#34402A";
+        top.appendChild(nm);
+        var ctrls = elc("div", "edit-block__ctrls");
+        var up = btn("↑", ""), dn = btn("↓", "");
+        up.disabled = (i === 0); dn.disabled = (i === order.length - 1);
+        up.onclick = function () { move(i, -1); };
+        dn.onclick = function () { move(i, 1); };
+        ctrls.appendChild(up); ctrls.appendChild(dn);
+        top.appendChild(ctrls);
+        row.appendChild(top);
+        list.appendChild(row);
+      });
+    }
+    cancel.onclick = m.close;
+    save.onclick = function () {
+      save.disabled = true; save.textContent = "Stoor…";
+      saveContent("section_order", JSON.stringify(order))
+        .then(function () { safeReapply(); m.close(); toast("Volgorde gestoor ✓"); })
+        .catch(function (e) { console.error(e); save.disabled = false; save.textContent = "Stoor volgorde"; toast("Kon nie stoor nie"); });
+    };
+    render();
+  }
+
   /* ───────────────────────── her-aanwending (veilig) ───────────────────────── */
   var _floatBtn = null;
   function hideFloat() { if (_floatBtn) _floatBtn.style.display = "none"; }
@@ -525,6 +582,10 @@
     /* Boonste wysig-balk */
     var bar = elc("div", "edit-bar");
     bar.appendChild(elc("span", "edit-bar__msg", "✎ Wysig-modus — beweeg oor enige teks of foto en klik die wysig-knoppie."));
+    var barBtns = elc("div");
+    barBtns.style.cssText = "display:flex;gap:10px;align-items:center;flex-wrap:wrap";
+    var reorder = btn("⇅ Skuif afdelings", "");
+    reorder.onclick = openOrderEditor;
     var done = btn("Klaar", "primary");
     done.onclick = function () {
       // Binne die admin-iframe: laai net hierdie iframe weer (bly op die Redigeer-tab).
@@ -532,7 +593,9 @@
       if (EMBEDDED) { location.reload(); }
       else { location.href = "admin.html"; }
     };
-    bar.appendChild(done);
+    barBtns.appendChild(reorder);
+    barBtns.appendChild(done);
+    bar.appendChild(barBtns);
     document.body.appendChild(bar);
 
     /* Open die regte wysiger vir 'n element */
