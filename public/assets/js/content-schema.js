@@ -93,6 +93,8 @@ window.CONTENT_SCHEMA = [
     help:"Plak enige Google Maps \"deel\"-skakel. Los leeg om die hele ligging-blok weg te steek." },
 
   // ───── Tema & drag ─────
+  { key:"tema_txt_titel", label:"Tema — teks-opskrif", type:"text", group:"Tema & drag", default:"Wat om aan te trek",
+    help:"Die klein opskrif bo die tema-beskrywing (bv. \"Wat om aan te trek\")." },
   { key:"tema_p1", label:"Tema — paragraaf 1", type:"textarea", group:"Tema & drag",
     default:"Ons tema is sag en natuurlik — eukalyptusgroen, salie en warm sandtone. Trek gemaklik aan in pastel-kleure wat by die bosveld pas." },
   { key:"tema_drag_label", label:"Tema — \"Drag:\"-etiket", type:"text", group:"Tema & drag", default:"Drag:" },
